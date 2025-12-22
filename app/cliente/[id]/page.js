@@ -290,8 +290,9 @@ export default function ClientePage() {
       return
     }
 
-    const dataInicio = new Date(pdfDataInicio)
-    const dataFim = new Date(pdfDataFim)
+    const dataInicio = new Date(pdfDataInicio.replace(/-/g, '/'))
+    const dataFim = new Date(pdfDataFim.replace(/-/g, '/'))
+    dataFim.setHours(23, 59, 59, 999)
 
     if (dataFim < dataInicio) {
       alert('A data final não pode ser anterior à data inicial')
@@ -641,7 +642,14 @@ export default function ClientePage() {
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-full p-0">
-                          <Command>
+                          <Command
+                            filter={(value, search) => {
+                              const normalize = (str) => 
+                                str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+                              
+                              return normalize(value).includes(normalize(search)) ? 1 : 0;
+                            }}
+                          >
                             <CommandInput placeholder="Buscar produto..." />
                             <CommandList 
                               className="max-h-64"
