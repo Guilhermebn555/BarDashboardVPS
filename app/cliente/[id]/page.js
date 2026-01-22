@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, Plus, DollarSign, ShoppingBag, Calendar, Zap, Trash2, Edit, FileDown } from 'lucide-react'
+import { ArrowLeft, Plus, DollarSign, ShoppingBag, Calendar, Zap, Trash2, Edit, FileDown, Tag } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog'
@@ -40,6 +40,9 @@ export default function ClientePage() {
   const [modoPersonalizado, setModoPersonalizado] = useState(false)
   const [produtoPersonalizado, setProdutoPersonalizado] = useState({ nome: '', preco: '' })
   const [observacoesCompra, setObservacoesCompra] = useState('')
+  
+  const [descontoValor, setDescontoValor] = useState('')
+  const [showInputDesconto, setShowInputDesconto] = useState(false)
 
   const [valorAbate, setValorAbate] = useState('')
   const [formaPagamento, setFormaPagamento] = useState('dinheiro')
@@ -191,7 +194,7 @@ export default function ClientePage() {
     setItensCompra(itensCompra.filter(i => i.id !== itemId))
   }
 
-  const calcularTotalCompra = () => {
+  const calcularTotalBruto = () => {
     return itensCompra.reduce((total, item) => total + (item.preco * item.quantidade), 0)
   }
 
@@ -199,7 +202,11 @@ export default function ClientePage() {
     if (itensCompra.length === 0) return
 
     try {
-      const total = calcularTotalCompra()
+      const totalBruto = calcularTotalBruto()
+      
+      const desconto = descontoValor ? parseFloat(descontoValor) : 0
+      const totalFinal = Math.max(0, totalBruto - desconto)
+
       const descricao = itensCompra.map(i => `${i.quantidade}x ${i.nome}`).join(', ')
       
       const res = await fetch('/api/transacoes', {
@@ -208,8 +215,13 @@ export default function ClientePage() {
         body: JSON.stringify({
           cliente_id: clienteId,
           tipo: 'compra',
-          valor: total,
-          dados: { descricao, itens: itensCompra },
+          valor: totalFinal,
+          dados: { 
+            descricao, 
+            itens: itensCompra,
+            subtotal: totalBruto,
+            desconto_aplicado: desconto
+          },
           observacoes: observacoesCompra || null
         })
       })
@@ -220,6 +232,8 @@ export default function ClientePage() {
         setItensCompra([])
         setProdutoSelecionado(null)
         setObservacoesCompra('')
+        setDescontoValor('')
+        setShowInputDesconto(false)
       }
     } catch (error) {
       console.error('Error adding purchase:', error)
@@ -599,7 +613,13 @@ export default function ClientePage() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6">
-            <Dialog open={showCompra} onOpenChange={setShowCompra}>
+            <Dialog open={showCompra} onOpenChange={(open) => {
+              setShowCompra(open)
+              if (!open) {
+                setDescontoValor('')
+                setShowInputDesconto(false)
+              }
+            }}>
               <DialogTrigger asChild>
                 <Button size="sm" className="flex-1 sm:h-11">
                   <ShoppingBag className="w-4 h-4 mr-2" />
@@ -766,11 +786,65 @@ export default function ClientePage() {
                           </div>
                         </div>
                       ))}
-                      <div className="border-t pt-2 mt-2">
-                        <div className="flex justify-between items-center">
-                          <span className="font-bold">Total:</span>
-                          <span className="text-xl font-bold text-red-600 dark:text-red-400">
-                            {formatCurrency(calcularTotalCompra())}
+                      
+                      {/* ÁREA DE TOTAIS E DESCONTOS */}
+                      <div className="border-t pt-4 mt-2 space-y-2">
+                        
+                        {/* Se houver desconto visível ou aplicado, mostra o subtotal */}
+                        {(showInputDesconto || descontoValor) && (
+                          <div className="flex justify-between items-center text-sm text-muted-foreground">
+                            <span>Subtotal:</span>
+                            <span>{formatCurrency(calcularTotalBruto())}</span>
+                          </div>
+                        )}
+
+                        {/* Botão para ativar desconto OU o campo de input */}
+                        {!showInputDesconto && !descontoValor ? (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-auto p-0 text-blue-600 hover:text-blue-700 hover:bg-transparent"
+                            onClick={() => setShowInputDesconto(true)}
+                          >
+                            <Tag className="w-3 h-3 mr-1" />
+                            Adicionar Desconto (R$)
+                          </Button>
+                        ) : (
+                          <div className="flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-1 duration-200">
+                            <Label htmlFor="desconto" className="text-sm whitespace-nowrap text-red-500">
+                              Desconto (R$):
+                            </Label>
+                            <div className="flex items-center gap-2">
+                              <span className="text-red-500 font-bold">-</span>
+                              <Input
+                                id="desconto"
+                                type="number"
+                                step="0.01"
+                                placeholder="0.00"
+                                className="w-32 text-right h-8"
+                                value={descontoValor}
+                                onChange={(e) => setDescontoValor(e.target.value)}
+                                autoFocus
+                              />
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8"
+                                onClick={() => {
+                                  setDescontoValor('')
+                                  setShowInputDesconto(false)
+                                }}
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="flex justify-between items-center pt-2">
+                          <span className="font-bold text-lg">Total Final:</span>
+                          <span className="text-2xl font-bold text-red-600 dark:text-red-400">
+                            {formatCurrency(Math.max(0, calcularTotalBruto() - (parseFloat(descontoValor) || 0)))}
                           </span>
                         </div>
                       </div>
@@ -928,6 +1002,13 @@ export default function ClientePage() {
                           ))}
                         </div>
                       )}
+                      
+                      {transacao.dados?.desconto_aplicado > 0 && (
+                         <div className="text-xs text-red-500 mt-1 font-semibold">
+                            Desconto aplicado: -{formatCurrency(transacao.dados.desconto_aplicado)}
+                         </div>
+                      )}
+
                       {transacao.observacoes && (
                         <p className="text-sm text-blue-600 dark:text-blue-400 mt-2 italic">
                           Obs: {transacao.observacoes}

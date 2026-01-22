@@ -267,7 +267,8 @@ export async function POST(request) {
           nome: validData.nome,
           preco: validData.preco,
           categoria: validData.categoria || null,
-          ativo: validData.ativo !== false
+          ativo: validData.ativo !== false,
+          valor_taxa: validData.valor_taxa || 0
         }])
         .select()
         .single()
@@ -294,7 +295,8 @@ export async function POST(request) {
         .insert([{
           nome: validData.nome,
           itens: validData.itens || [],
-          observacoes: validData.observacoes || null
+          observacoes: validData.observacoes || null,
+          logs: validData.logs || []
         }])
         .select()
         .single()
@@ -415,7 +417,8 @@ export async function PUT(request) {
           nome: validData.nome,
           preco: validData.preco,
           categoria: validData.categoria,
-          ativo: validData.ativo
+          ativo: validData.ativo,
+          valor_taxa: validData.valor_taxa || 0
         })
         .eq('id', id)
         .select()
@@ -454,7 +457,8 @@ export async function PUT(request) {
         .update({
           nome: validData.nome,
           itens: validData.itens,
-          observacoes: validData.observacoes
+          observacoes: validData.observacoes,
+          logs: validData.logs
         })
         .eq('id', id)
         .select()
