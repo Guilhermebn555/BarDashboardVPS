@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus } from 'lucide-react'
+import { Plus, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,7 +12,10 @@ export function AddClientDialog({
   onOpenChange, 
   novoCliente, 
   setNovoCliente, 
-  onAddClient 
+  onAddClient,
+  loading,
+  setSavingClient,
+  savingClient
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -108,8 +111,15 @@ export function AddClientDialog({
             <p className="text-xs text-muted-foreground mt-1">Separe múltiplas tags com vírgula</p>
           </div>
 
-          <Button onClick={onAddClient} className="w-full" disabled={!novoCliente.nome.trim()}>
-            Adicionar Cliente
+          <Button onClick={onAddClient} className="w-full" disabled={!novoCliente.nome.trim() || savingClient}>
+            {savingClient ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Salvando...
+              </>
+            ) : (
+              'Adicionar Cliente'
+            )}
           </Button>
         </div>
       </DialogContent>

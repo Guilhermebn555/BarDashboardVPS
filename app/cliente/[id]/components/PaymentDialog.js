@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { DollarSign } from 'lucide-react'
+import { DollarSign, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
@@ -13,8 +13,11 @@ export function PaymentDialog({ clienteId, onSuccess }) {
   const [valorAbate, setValorAbate] = useState('')
   const [formaPagamento, setFormaPagamento] = useState('dinheiro')
 
+  const [loading, setLoading] = useState(false)
+
   const handleAbater = async () => {
     if (!valorAbate || parseFloat(valorAbate) <= 0) return
+    setLoading(true)
     try {
       const res = await fetch('/api/transacoes', {
         method: 'POST',
@@ -32,7 +35,12 @@ export function PaymentDialog({ clienteId, onSuccess }) {
         setValorAbate('')
         setFormaPagamento('dinheiro')
       }
-    } catch (error) { console.error(error) }
+    } catch (error) {
+      console.error(error)
+    }
+    finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -60,7 +68,7 @@ export function PaymentDialog({ clienteId, onSuccess }) {
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={handleAbater} className="w-full" disabled={!valorAbate}>Registrar</Button>
+          <Button onClick={handleAbater} className="w-full" disabled={!valorAbate || loading}>Registrar</Button>
         </div>
       </DialogContent>
     </Dialog>

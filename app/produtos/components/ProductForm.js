@@ -1,13 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 
-export function ProductForm({ open, onOpenChange, onSubmit, editingProduto }) {
+export function ProductForm({ open, onOpenChange, onSubmit, editingProduto, addingProduto }) {
   const [formData, setFormData] = useState({
     nome: '',
     preco: '',
@@ -96,12 +96,16 @@ export function ProductForm({ open, onOpenChange, onSubmit, editingProduto }) {
             </p>
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={!formData.nome || !formData.preco || parseFloat(formData.preco) <= 0}
-          >
-            {editingProduto ? 'Salvar Alterações' : 'Adicionar Produto'}
+          
+          <Button type="submit" className="w-full" disabled={!formData.nome || !formData.preco || parseFloat(formData.preco) <= 0 || addingProduto}>
+            {addingProduto ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Processando...
+              </>
+            ) : (
+              editingProduto ? 'Salvar Alterações' : 'Adicionar Produto'
+            )}
           </Button>
         </form>
       </DialogContent>

@@ -10,6 +10,16 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Badge } from '@/components/ui/badge'
 
+const normalizeText = (text) => {
+  if (!text) return ''
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[-]/g, ' ')
+    .replace(/[^\w\s]/g, '')
+}
+
 export function AddItemDialog({ mesa, produtos, onAddItem }) {
   const [open, setOpen] = useState(false)
   const [produtoOpen, setProdutoOpen] = useState(false)
@@ -21,7 +31,6 @@ export function AddItemDialog({ mesa, produtos, onAddItem }) {
   const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
 
   const handleConfirm = () => {
-    // Passa os dados para o pai (page.js) processar
     onAddItem(mesa, {
       produtoSelecionado,
       quantidade,
@@ -29,7 +38,6 @@ export function AddItemDialog({ mesa, produtos, onAddItem }) {
       produtoPersonalizado
     })
     
-    // Reseta o estado local
     setOpen(false)
     setProdutoSelecionado(null)
     setQuantidade('1')
@@ -77,7 +85,13 @@ export function AddItemDialog({ mesa, produtos, onAddItem }) {
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-full p-0">
-                  <Command filter={(value, search) => value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0}>
+                  <Command 
+                    filter={(value, search) => {
+                      const normalizedValue = normalizeText(value)
+                      const normalizedSearch = normalizeText(search)
+                      return normalizedValue.includes(normalizedSearch) ? 1 : 0
+                    }}
+                  >
                     <CommandInput placeholder="Buscar produto..." />
                     <CommandList className="max-h-64">
                       <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>

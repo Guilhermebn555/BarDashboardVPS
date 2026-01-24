@@ -7,17 +7,52 @@ import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { ProductForm } from './components/ProductForm'
 import { ProductList } from './components/ProductList'
+import { ProductSearch } from './components/ProductSearch'
+
+const normalizeText = (text) => {
+  if (!text) return ''
+  
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[-]/g, ' ')
+    .replace(/[^\w\s]/g, '')
+}
 
 export default function ProdutosPage() {
   const router = useRouter()
   const [produtos, setProdutos] = useState([])
   const [loading, setLoading] = useState(true)
+  const [addingProduto, setAddingProduto] = useState(false)
   const [showAdd, setShowAdd] = useState(false)
   const [editingProduto, setEditingProduto] = useState(null)
+  
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState([])
 
   useEffect(() => {
     loadProdutos()
   }, [])
+
+  useEffect(() => {
+    if (searchQuery) {
+      const queryNormalized = normalizeText(searchQuery)
+
+      const filtered = produtos.filter(p => {
+        const nomeNormalized = normalizeText(p.nome)
+        const categoriaNormalized = normalizeText(p.categoria)
+
+        return (
+          nomeNormalized.includes(queryNormalized) ||
+          categoriaNormalized.includes(queryNormalized)
+        )
+      })
+      setSearchResults(filtered)
+    } else {
+      setSearchResults([])
+    }
+  }, [searchQuery, produtos])
 
   const loadProdutos = async () => {
     try {
@@ -32,6 +67,7 @@ export default function ProdutosPage() {
   }
 
   const handleSave = async (formData) => {
+    setAddingProduto(true)
     try {
       const url = editingProduto ? `/api/produtos/${editingProduto.id}` : '/api/produtos'
       const method = editingProduto ? 'PUT' : 'POST'
@@ -55,6 +91,8 @@ export default function ProdutosPage() {
       }
     } catch (error) {
       console.error(error)
+    } finally {
+      setAddingProduto(false)
     }
   }
 
@@ -76,6 +114,8 @@ export default function ProdutosPage() {
     }
   }
 
+  const displayedProdutos = searchQuery ? searchResults : produtos
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <header className="bg-white dark:bg-gray-800 border-b dark:border-gray-700">
@@ -93,6 +133,11 @@ export default function ProdutosPage() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        <ProductSearch 
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+        />
+
         <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <h2 className="text-lg sm:text-xl font-semibold">Catálogo de Produtos</h2>
           <ProductForm 
@@ -103,11 +148,12 @@ export default function ProdutosPage() {
             }}
             onSubmit={handleSave}
             editingProduto={editingProduto}
+            addingProduto={addingProduto}
           />
         </div>
 
         <ProductList 
-          produtos={produtos} 
+          produtos={displayedProdutos} 
           loading={loading} 
           onEdit={handleEdit} 
           onDelete={handleDelete} 

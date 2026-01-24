@@ -7,6 +7,16 @@ import { SearchAndFilters } from '@/components/dashboard/SearchAndFilters'
 import { AddClientDialog } from '@/components/dashboard/AddClientDialog'
 import { ClientList } from '@/components/dashboard/ClientList'
 
+const normalizeText = (text) => {
+  if (!text) return ''
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[-]/g, ' ')
+    .replace(/[^\w\s]/g, '')
+}
+
 export default function App() {
   const [clientes, setClientes] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
@@ -14,6 +24,7 @@ export default function App() {
   const [showAddClient, setShowAddClient] = useState(false)
   const [loading, setLoading] = useState(true)
   const [showFilters, setShowFilters] = useState(false)
+  const [savingClient, setSavingClient] = useState(false)
   
   const [filtroDiaPagamento, setFiltroDiaPagamento] = useState('')
   const [filtroLimiteMin, setFiltroLimiteMin] = useState('')
@@ -46,12 +57,24 @@ export default function App() {
     const filters = []
 
     if (searchQuery.length > 0) {
-      filtered = filtered.filter(c => 
-        c.nome.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.telefone?.includes(searchQuery) ||
-        c.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (c.apelidos || []).some(a => a.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
+      const queryNormalized = normalizeText(searchQuery)
+
+      filtered = filtered.filter(c => {
+        const nomeNorm = normalizeText(c.nome)
+        const telefoneNorm = normalizeText(c.telefone)
+        const emailNorm = normalizeText(c.email)
+        
+        const temApelido = (c.apelidos || []).some(a => 
+          normalizeText(a).includes(queryNormalized)
+        )
+
+        return (
+          nomeNorm.includes(queryNormalized) ||
+          telefoneNorm.includes(queryNormalized) ||
+          emailNorm.includes(queryNormalized) ||
+          temApelido
+        )
+      })
     }
 
     if (filtroDiaPagamento) {
@@ -90,9 +113,11 @@ export default function App() {
         filters.push('Saldo Zerado')
       }
     }
-
     if (filtroTag) {
-      filtered = filtered.filter(c => c.tags && c.tags.some(t => t.toLowerCase().includes(filtroTag.toLowerCase())))
+      const tagQuery = normalizeText(filtroTag)
+      filtered = filtered.filter(c => 
+        c.tags && c.tags.some(t => normalizeText(t).includes(tagQuery))
+      )
       filters.push(`Tag: ${filtroTag}`)
     }
 
@@ -142,6 +167,8 @@ export default function App() {
   const handleAddClient = async () => {
     if (!novoCliente.nome.trim()) return
 
+    setSavingClient(true)
+
     try {
       const apelidosArray = novoCliente.apelidos ? novoCliente.apelidos.split(',').map(a => a.trim()).filter(a => a) : []
       const tagsArray = novoCliente.tags ? novoCliente.tags.split(',').map(t => t.trim()).filter(t => t) : []
@@ -164,7 +191,11 @@ export default function App() {
         setShowAddClient(false)
         setNovoCliente({ nome: '', telefone: '', email: '', apelidos: '', dia_pagamento: '', limite_credito: '', tags: '' })
       }
-    } catch (error) { console.error('Error adding client:', error) }
+    } catch (error) { 
+      console.error('Error adding client:', error)
+    } finally {
+      setSavingClient(false)
+    }
   }
 
   const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
@@ -214,6 +245,8 @@ export default function App() {
             novoCliente={novoCliente}
             setNovoCliente={setNovoCliente}
             onAddClient={handleAddClient}
+            setSavingClient={setSavingClient}
+            savingClient={savingClient}
           />
         </div>
 

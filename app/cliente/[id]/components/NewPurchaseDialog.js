@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, ShoppingBag, Trash2, Tag, Check } from 'lucide-react'
+import { Plus, ShoppingBag, Trash2, Tag, Check, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
@@ -10,6 +10,16 @@ import { Badge } from '@/components/ui/badge'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Textarea } from '@/components/ui/textarea'
+
+const normalizeText = (text) => {
+  if (!text) return ''
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[-]/g, ' ')
+    .replace(/[^\w\s]/g, '')
+}
 
 export function NewPurchaseDialog({ clienteId, produtos, onSuccess }) {
   const [open, setOpen] = useState(false)
@@ -22,6 +32,7 @@ export function NewPurchaseDialog({ clienteId, produtos, onSuccess }) {
   const [observacoesCompra, setObservacoesCompra] = useState('')
   const [descontoValor, setDescontoValor] = useState('')
   const [showInputDesconto, setShowInputDesconto] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val)
 
@@ -47,8 +58,6 @@ export function NewPurchaseDialog({ clienteId, produtos, onSuccess }) {
       if (produtoSelecionado.valor_taxa && parseFloat(produtoSelecionado.valor_taxa) > 0) {
         const taxa = parseFloat(produtoSelecionado.valor_taxa)
         precoFinal += taxa
-        // Indicar no nome que tem taxa, ou deixar implícito no preço:
-        // nomeFinal += ` (+ Taxa)` 
       }
       
       const novoItem = {
@@ -75,7 +84,7 @@ export function NewPurchaseDialog({ clienteId, produtos, onSuccess }) {
 
   const handleFinalizarCompra = async () => {
     if (itensCompra.length === 0) return
-
+    setLoading(true)
     try {
       const totalBruto = calcularTotalBruto()
       const desconto = descontoValor ? parseFloat(descontoValor) : 0
@@ -110,6 +119,8 @@ export function NewPurchaseDialog({ clienteId, produtos, onSuccess }) {
       }
     } catch (error) {
       console.error('Error adding purchase:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -149,16 +160,22 @@ export function NewPurchaseDialog({ clienteId, produtos, onSuccess }) {
           {!modoPersonalizado ? (
             <div>
               <Label>Produto</Label>
-              <Popover open={produtoOpen} onOpenChange={setProdutoOpen}>
+              <Popover open={produtoOpen} onOpenChange={setProdutoOpen} modal={true}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" role="combobox" className="w-full justify-between">
                     {produtoSelecionado ? produtoSelecionado.nome : 'Selecione um produto...'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-full p-0">
-                  <Command filter={(value, search) => value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0}>
+                  <Command 
+                    filter={(value, search) => {
+                      const normalizedValue = normalizeText(value)
+                      const normalizedSearch = normalizeText(search)
+                      return normalizedValue.includes(normalizedSearch) ? 1 : 0
+                    }}
+                  >
                     <CommandInput placeholder="Buscar produto..." />
-                    <CommandList className="max-h-64">
+                    <CommandList className="max-h-64 overflow-y-auto overflow-x-hidden">
                       <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
                       <CommandGroup>
                         {produtos.map((produto) => (
@@ -277,8 +294,15 @@ export function NewPurchaseDialog({ clienteId, produtos, onSuccess }) {
             <Textarea value={observacoesCompra} onChange={(e) => setObservacoesCompra(e.target.value)} rows={3} />
           </div>
 
-          <Button onClick={handleFinalizarCompra} className="w-full" disabled={itensCompra.length === 0}>
-            Finalizar Compra
+          <Button onClick={handleFinalizarCompra} className="w-full" disabled={itensCompra.length === 0 || loading}>
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Processando...
+              </>
+            ) : (
+              'Finalizar Compra'
+            )}
           </Button>
         </div>
       </DialogContent>

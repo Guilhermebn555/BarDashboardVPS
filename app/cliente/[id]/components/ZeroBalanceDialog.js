@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Zap } from 'lucide-react'
+import { Zap, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -10,10 +10,15 @@ import { Label } from '@/components/ui/label'
 export function ZeroBalanceDialog({ cliente, onSuccess }) {
   const [open, setOpen] = useState(false)
   const [formaPagamento, setFormaPagamento] = useState('dinheiro')
+  const [setLoading, loading] = useState(false)
 
   const handleZerar = async () => {
+    if (cliente.saldo >= 0) return
+
+    setLoading(true)
     try {
       const valorParaZerar = Math.abs(cliente.saldo)
+      
       const res = await fetch('/api/transacoes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -21,15 +26,19 @@ export function ZeroBalanceDialog({ cliente, onSuccess }) {
           cliente_id: cliente.id,
           tipo: 'abate',
           valor: valorParaZerar,
-          dados: { forma_pagamento: formaPagamento, tipo_abate: 'zerar_conta' }
+          observacoes: 'Quitação total de dívida'
         })
       })
+
       if (res.ok) {
-        onSuccess()
         setOpen(false)
-        setFormaPagamento('dinheiro')
+        onSuccess()
       }
-    } catch (error) { console.error(error) }
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val)
@@ -59,7 +68,16 @@ export function ZeroBalanceDialog({ cliente, onSuccess }) {
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={handleZerar} className="w-full">Confirmar</Button>
+          <Button onClick={handleZerar} className="w-full" disabled={loading}>
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Processando...
+              </>
+            ) : (
+              'Confirmar Quitação'
+            )}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
