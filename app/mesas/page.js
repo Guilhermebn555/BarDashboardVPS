@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader'
 import { NewMesaDialog } from './components/NewMesaDialog'
 import { MesaList } from './components/MesaList'
 
@@ -291,19 +292,11 @@ export default function MesasPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <header className="bg-white dark:bg-gray-800 border-b dark:border-gray-700">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-              <Button variant="ghost" size="sm" onClick={() => router.push('/')}>
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
-              <h1 className="text-base sm:text-2xl font-bold text-gray-900 dark:text-gray-100 truncate">Mesas / Consumo do Dia</h1>
-            </div>
-            <ThemeToggle />
-          </div>
-        </div>
-      </header>
+      <DashboardHeader 
+        title="Mesas / Consumo Diário"
+        logout={false}
+        arrow={true}
+      />
 
       <main className="container mx-auto px-4 py-8">
         <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
