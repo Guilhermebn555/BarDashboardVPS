@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label'
 export function ZeroBalanceDialog({ cliente, onSuccess }) {
   const [open, setOpen] = useState(false)
   const [formaPagamento, setFormaPagamento] = useState('dinheiro')
-  const [setLoading, loading] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const handleZerar = async () => {
     if (cliente.saldo >= 0) return
@@ -26,7 +26,7 @@ export function ZeroBalanceDialog({ cliente, onSuccess }) {
           cliente_id: cliente.id,
           tipo: 'abate',
           valor: valorParaZerar,
-          observacoes: 'Quitação total de dívida'
+          dados: { forma_pagamento: formaPagamento }
         })
       })
 

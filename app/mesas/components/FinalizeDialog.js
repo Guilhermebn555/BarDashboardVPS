@@ -26,7 +26,6 @@ export function FinalizeDialog({ mesa, clientes, total, onFinalize }) {
       total
     })
     setOpen(false)
-    // Reset states
     setTipoPagamento('vista')
     setClienteSelecionado('')
     setFormaPagamento('dinheiro')
@@ -118,7 +117,7 @@ export function FinalizeDialog({ mesa, clientes, total, onFinalize }) {
           <Button
             onClick={handleConfirm}
             className="w-full"
-            disabled={(tipoPagamento === 'fiado' && !clienteSelecionado) || total <= 0}
+            disabled={(tipoPagamento === 'fiado' && !clienteSelecionado) || total == 0}
           >
             Confirmar e Finalizar
           </Button>

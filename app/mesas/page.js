@@ -94,7 +94,6 @@ export default function MesasPage() {
       }
       logMsg = `Adicionou ${quantidade}x ${produtoPersonalizado.nome} (Manual)`
     } else {
-      // --- LÓGICA DA TAXA EXTRA AQUI ---
       let precoFinal = produtoSelecionado.preco
       let temTaxa = false
       
@@ -107,7 +106,7 @@ export default function MesasPage() {
         id: Date.now().toString(),
         produto_id: produtoSelecionado.id,
         nome: produtoSelecionado.nome,
-        preco: precoFinal, // Preço já com a taxa somada
+        preco: precoFinal, 
         quantidade: parseInt(quantidade),
         ehAbatimento: false
       }
@@ -200,11 +199,6 @@ export default function MesasPage() {
   const handleAbater = async (mesa, { valorAbater, metodoPagamentoAbater, total }) => {
     const valor = parseFloat(valorAbater)
 
-    if (valor > total) {
-      alert('O valor a abater não pode ser maior que o total da mesa.')
-      return
-    }
-
     const itemAbatimento = {
       id: Date.now().toString(),
       nome: `Abatimento (${metodoPagamentoAbater})`,
@@ -238,12 +232,14 @@ export default function MesasPage() {
 
   const handleFinalize = async (mesa, { tipoPagamento, clienteSelecionado, formaPagamento, observacoesCompra, total }) => {
     if (tipoPagamento === 'fiado') {
+      mesa.itens.forEach(async i => {
+        if (i.ehAbatimento) {
+          const pos = Math.abs(i.preco)
+          const preco = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(pos)
+          i.nome = `${i.quantidade}x ${i.nome} - ${preco}`
+        }
+      })
       try {
-        const descricao = mesa.itens
-          .filter(i => !i.ehAbatimento)
-          .map(i => `${i.quantidade}x ${i.nome}`)
-          .join(', ')
-        
         await fetch('/api/transacoes', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -252,7 +248,6 @@ export default function MesasPage() {
             tipo: 'compra',
             valor: total,
             dados: { 
-              descricao,
               mesa: mesa.nome,
               itens: mesa.itens,
               logs: mesa.logs

@@ -29,7 +29,7 @@ export function AbateDialog({ mesa, total, onAbate }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="secondary" size="sm" className="flex-1" disabled={mesa.itens.length === 0 || total <= 0}>
+        <Button variant="secondary" size="sm" className="flex-1">
           <DollarSign className="w-4 h-4 mr-2" />
           Abater
         </Button>
@@ -75,7 +75,7 @@ export function AbateDialog({ mesa, total, onAbate }) {
           <Button
             onClick={handleConfirm}
             className="w-full"
-            disabled={!valorAbater || parseFloat(valorAbater) <= 0}
+            disabled={!valorAbater}
           >
             Confirmar e Abater
           </Button>

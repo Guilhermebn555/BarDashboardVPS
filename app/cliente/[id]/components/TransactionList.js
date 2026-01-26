@@ -2,6 +2,9 @@
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { ScrollText } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 
 export function TransactionList({ transacoes }) {
   const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val)
@@ -50,11 +53,39 @@ export function TransactionList({ transacoes }) {
 
                 {transacao.observacoes && <p className="text-sm text-blue-600 mt-2 italic">Obs: {transacao.observacoes}</p>}
                 {transacao.dados?.forma_pagamento && <p className="text-xs text-muted-foreground mt-1">Forma: {transacao.dados.forma_pagamento}</p>}
+                
+                {transacao.dados?.logs && transacao.dados.logs.length > 0 && (
+                  <div className="mt-3">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="h-8 text-xs">
+                          <ScrollText className="w-3 h-3 mr-2" />
+                          Ver Logs
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-md max-h-[80vh] flex flex-col">
+                        <DialogHeader>
+                          <DialogTitle>Histórico - {transacao.dados.mesa || 'Transação'}</DialogTitle>
+                        </DialogHeader>
+                        <div className="flex-1 overflow-y-auto pr-2 space-y-2">
+                          {transacao.dados.logs.slice().reverse().map((log, index) => (
+                            <div key={index} className="text-sm border-b pb-2 last:border-0">
+                              <p className="text-gray-800 dark:text-gray-200">{log.mensagem}</p>
+                              <p className="text-xs text-gray-400 mt-1">
+                                {new Date(log.data).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                )}
               </div>
 
               <div className="w-full sm:w-auto sm:text-right">
-                <p className={`text-lg sm:text-xl font-bold ${transacao.tipo === 'compra' ? 'text-red-600' : 'text-green-600'}`}>
-                  {transacao.tipo === 'compra' ? '-' : '+'} {formatCurrency(transacao.valor)}
+                <p className={`text-lg sm:text-xl font-bold ${transacao.tipo === 'compra' && transacao.valor > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                  {transacao.valor > 0 ? transacao.tipo === 'compra' ? '-' : '+' : ''} {formatCurrency(transacao.valor)}
                 </p>
               </div>
             </div>

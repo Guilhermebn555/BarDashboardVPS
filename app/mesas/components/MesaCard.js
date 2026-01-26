@@ -1,12 +1,13 @@
 'use client'
 
-import { Minus, Plus, Trash2 } from 'lucide-react'
+import { Minus, Plus, Trash2, Printer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AddItemDialog } from './AddItemDialog'
 import { FinalizeDialog } from './FinalizeDialog'
 import { AbateDialog } from './AbateDialog'
 import { LogsDialog } from './LogsDialog'
+import handlePrintPDF from '@/lib/pdf-mesas'
 
 export function MesaCard({ 
   mesa, 
@@ -19,6 +20,7 @@ export function MesaCard({
   onAbate, 
   onCloseMesa 
 }) {
+  const getBalanceColor = (saldo) => saldo > 0 ? 'text-green-600 dark:text-green-400' : saldo < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-600'
   const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
 
   const calcularTotal = (itens) => {
@@ -26,6 +28,8 @@ export function MesaCard({
   }
 
   const total = calcularTotal(mesa.itens)
+
+  const printPDF = () => handlePrintPDF(mesa, total)
 
   return (
     <Card className="relative">
@@ -45,13 +49,24 @@ export function MesaCard({
               </p>
             )}
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onCloseMesa(mesa.id)}
-          >
-            <Trash2 className="w-4 h-4 text-red-600" />
-          </Button>
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={printPDF}
+              title="Imprimir Cupom"
+            >
+              <Printer className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onCloseMesa(mesa.id)}
+            >
+              <Trash2 className="w-4 h-4 text-red-600" />
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -124,7 +139,7 @@ export function MesaCard({
         <div className="border-t pt-4 mb-4">
           <div className="flex justify-between items-center">
             <span className="text-lg font-semibold">Total:</span>
-            <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+            <span className={`text-2xl font-bold ${getBalanceColor(total)}`}>
               {formatCurrency(total)}
             </span>
           </div>
