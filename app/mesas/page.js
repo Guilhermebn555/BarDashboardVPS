@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Calendar, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader'
@@ -231,6 +231,19 @@ export default function MesasPage() {
   }
 
   const handleFinalize = async (mesa, { tipoPagamento, clienteSelecionado, formaPagamento, observacoesCompra, total }) => {
+    const dadosHistorico = {
+      nome_mesa: mesa.nome,
+      data_abertura: mesa.created_at,
+      itens: mesa.itens,
+      total: total,
+      forma_pagamento: tipoPagamento === 'fiado' ? 'Fiado / Caderneta' : formaPagamento,
+      foi_fiado: tipoPagamento === 'fiado',
+      cliente_nome: tipoPagamento === 'fiado' 
+        ? clientes.find(c => c.id === clienteSelecionado)?.nome || 'Cliente Desconhecido'
+        : null,
+      logs: mesa.logs
+    }
+
     if (tipoPagamento === 'fiado') {
       mesa.itens.forEach(async i => {
         if (i.ehAbatimento) {
@@ -267,6 +280,16 @@ export default function MesasPage() {
     }
 
     try {
+      await fetch('/api/mesas-anteriores', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dadosHistorico)
+      })
+    } catch (error) {
+      console.error('Erro ao salvar histórico:', error)
+    }
+
+    try {
       await fetch(`/api/mesas/${mesa.id}`, { method: 'DELETE' })
       await loadMesas()
     } catch (error) {
@@ -296,7 +319,13 @@ export default function MesasPage() {
       <main className="container mx-auto px-4 py-8">
         <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <h2 className="text-lg sm:text-xl font-semibold">Mesas Abertas ({mesas.length})</h2>
-          <NewMesaDialog onCreate={handleCreateMesa} />
+          <div className="flex gap-4">
+            <Button size="sm" className="w-full sm:w-auto" onClick={() => router.push('/mesas-anteriores')}>
+              <Calendar className="w-4 h-4 mr-2" />
+              Histórico de Mesas
+            </Button>
+            <NewMesaDialog onCreate={handleCreateMesa} />
+          </div>
         </div>
 
         <MesaList 

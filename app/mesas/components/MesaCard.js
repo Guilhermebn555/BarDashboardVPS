@@ -9,6 +9,7 @@ import { AbateDialog } from './AbateDialog'
 import { LogsDialog } from './LogsDialog'
 import handlePrintPDF from '@/lib/pdf-mesas'
 
+
 export function MesaCard({ 
   mesa, 
   produtos, 
