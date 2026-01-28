@@ -28,7 +28,7 @@ export function MesaList({
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {mesas.map((mesa) => (
         <MesaCard
           key={mesa.id}
