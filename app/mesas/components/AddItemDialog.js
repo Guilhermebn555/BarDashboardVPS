@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Badge } from '@/components/ui/badge'
+import { useConfirmExit } from '@/hooks/useConfirmExit'
 
 const normalizeText = (text) => {
   if (!text) return ''
@@ -44,6 +45,8 @@ export function AddItemDialog({ mesa, produtos, onAddItem }) {
     setModoPersonalizado(false)
     setProdutoPersonalizado({ nome: '', preco: '' })
   }
+
+  useConfirmExit(open)
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -110,11 +113,6 @@ export function AddItemDialog({ mesa, produtos, onAddItem }) {
                               <p className="font-medium">{produto.nome}</p>
                               <div className="flex items-center gap-2">
                                 <p className="text-sm text-muted-foreground">{formatCurrency(produto.preco)}</p>
-                                {produto.valor_taxa > 0 && (
-                                    <Badge variant="outline" className="text-[10px] text-amber-600 border-amber-200 bg-amber-50">
-                                        +Taxa {formatCurrency(produto.valor_taxa)}
-                                    </Badge>
-                                )}
                               </div>
                             </div>
                           </CommandItem>
@@ -126,12 +124,7 @@ export function AddItemDialog({ mesa, produtos, onAddItem }) {
               </Popover>
               {produtoSelecionado && (
                 <div className="mt-2 text-sm">
-                    <p className="text-muted-foreground">Preço Base: {formatCurrency(produtoSelecionado.preco)}</p>
-                    {produtoSelecionado.valor_taxa > 0 && (
-                        <p className="text-amber-600 font-medium">
-                            + Taxa Extra: {formatCurrency(produtoSelecionado.valor_taxa)}
-                        </p>
-                    )}
+                    <p className="text-muted-foreground">Preço: {formatCurrency(produtoSelecionado.preco)}</p>
                 </div>
               )}
             </div>

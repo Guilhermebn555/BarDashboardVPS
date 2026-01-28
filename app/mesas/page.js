@@ -95,12 +95,6 @@ export default function MesasPage() {
       logMsg = `Adicionou ${quantidade}x ${produtoPersonalizado.nome} (Manual)`
     } else {
       let precoFinal = produtoSelecionado.preco
-      let temTaxa = false
-      
-      if (produtoSelecionado.valor_taxa && parseFloat(produtoSelecionado.valor_taxa) > 0) {
-        precoFinal += parseFloat(produtoSelecionado.valor_taxa)
-        temTaxa = true
-      }
 
       novoItem = {
         id: Date.now().toString(),
@@ -112,7 +106,6 @@ export default function MesasPage() {
       }
       
       logMsg = `Adicionou ${quantidade}x ${produtoSelecionado.nome}`
-      if(temTaxa) logMsg += ` (Taxa inclusa)`
     }
 
     try {

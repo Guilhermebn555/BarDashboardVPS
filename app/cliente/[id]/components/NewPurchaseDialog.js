@@ -21,7 +21,7 @@ const normalizeText = (text) => {
     .replace(/[^\w\s]/g, '')
 }
 
-export function NewPurchaseDialog({ clienteId, produtos, onSuccess }) {
+export function NewPurchaseDialog({ clienteId, produtos, onSuccess, setConfirmExit }) {
   const [open, setOpen] = useState(false)
   const [itensCompra, setItensCompra] = useState([])
   const [produtoOpen, setProdutoOpen] = useState(false)
@@ -72,6 +72,10 @@ export function NewPurchaseDialog({ clienteId, produtos, onSuccess }) {
       setProdutoSelecionado(null)
     }
     setQuantidade('1')
+  }
+
+  const useConfirmExit = () => {
+    setConfirmExit(true)
   }
 
   const handleRemoverItem = (itemId) => {
@@ -127,10 +131,10 @@ export function NewPurchaseDialog({ clienteId, produtos, onSuccess }) {
   return (
     <Dialog open={open} onOpenChange={(val) => {
       setOpen(val)
-      if(!val) { setShowInputDesconto(false); setDescontoValor(''); }
+      if(!val) { setShowInputDesconto(false); setDescontoValor(''); setConfirmExit(false); }
     }}>
       <DialogTrigger asChild>
-        <Button size="sm" className="flex-1 sm:h-11">
+        <Button onClick={useConfirmExit} size="sm" className="flex-1 sm:h-11">
           <ShoppingBag className="w-4 h-4 mr-2" />
           Nova Compra
         </Button>

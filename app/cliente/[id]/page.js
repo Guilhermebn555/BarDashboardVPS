@@ -11,6 +11,7 @@ import { NewPurchaseDialog } from './components/NewPurchaseDialog'
 import { PaymentDialog } from './components/PaymentDialog'
 import { ZeroBalanceDialog } from './components/ZeroBalanceDialog'
 import { TransactionList } from './components/TransactionList'
+import { useConfirmExit } from '@/hooks/useConfirmExit'
 
 export default function ClientePage() {
   const router = useRouter()
@@ -21,6 +22,9 @@ export default function ClientePage() {
   const [transacoes, setTransacoes] = useState([])
   const [produtos, setProdutos] = useState([])
   const [loading, setLoading] = useState(true)
+  const [confirmExit, setConfirmExit] = useState(false)
+
+  useConfirmExit(confirmExit);
 
   useEffect(() => {
     if (clienteId) {
@@ -120,7 +124,8 @@ export default function ClientePage() {
             <NewPurchaseDialog 
               clienteId={clienteId} 
               produtos={produtos} 
-              onSuccess={loadCliente} 
+              onSuccess={loadCliente}
+              setConfirmExit={setConfirmExit}
             />
 
             <PaymentDialog 
