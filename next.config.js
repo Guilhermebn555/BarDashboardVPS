@@ -22,9 +22,7 @@ const nextConfig = {
     maxInactiveAge: 10000,
     pagesBufferLength: 2,
   },
-  async headers() {
-    const allowedOrigins = process.env.ALLOWED_ORIGINS || 'http://localhost:3000'
-    
+  async headers() {    
     return [
       {
         source: "/(.*)",
@@ -39,7 +37,6 @@ const nextConfig = {
       {
         source: "/api/:path*",
         headers: [
-          { key: "Access-Control-Allow-Origin", value: allowedOrigins },
           { key: "Access-Control-Allow-Methods", value: "GET, POST, PUT, DELETE, OPTIONS" },
           { key: "Access-Control-Allow-Headers", value: "Content-Type, Authorization" },
           { key: "Access-Control-Max-Age", value: "86400" },
