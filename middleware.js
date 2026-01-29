@@ -32,6 +32,12 @@ export async function middleware(request) {
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
+      auth: { persistSession: false },
+      realtime: {
+        presence: {
+          enabled: false,
+        }
+      },
       cookies: {
         get(name) {
           return request.cookies.get(name)?.value
