@@ -4,6 +4,8 @@ import { Providers } from './providers'
 
 const inter = Inter({ subsets: ['latin'] })
 
+export const runtime = 'nodejs'
+
 export const metadata = {
   title: 'Bar do Roldão',
   description: 'Sistema de gestão para bar e mercearia',
