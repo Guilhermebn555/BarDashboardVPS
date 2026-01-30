@@ -14,7 +14,8 @@ export function MesaList({
   onFinalize, 
   onAbate, 
   onCloseMesa,
-  onRefresh
+  onRefresh,
+  loadMesas
 }) {
   if (mesas.length === 0) {
     return (
@@ -42,6 +43,7 @@ export function MesaList({
           onAbate={onAbate}
           onCloseMesa={onCloseMesa}
           onRefresh={onRefresh}
+          loadMesas={loadMesas}
         />
       ))}
     </div>

@@ -308,17 +308,6 @@ export default function MesasPage() {
     }
   }
 
-  const handleCloseMesa = async (mesaId) => {
-    if (!confirm('Deseja fechar esta mesa sem registrar?')) return
-    
-    try {
-      await fetch(`/api/mesas/${mesaId}`, { method: 'DELETE' })
-      await loadMesas()
-    } catch (error) {
-      console.error('Error closing mesa:', error)
-    }
-  }
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <DashboardHeader 
@@ -348,7 +337,7 @@ export default function MesasPage() {
           onRemoveItem={handleRemoverItem}
           onFinalize={handleFinalize}
           onAbate={handleAbater}
-          onCloseMesa={handleCloseMesa}
+          loadMesas={loadMesas}
         />
       </main>
     </div>

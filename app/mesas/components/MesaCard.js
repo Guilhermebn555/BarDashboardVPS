@@ -8,6 +8,7 @@ import { FinalizeDialog } from './FinalizeDialog'
 import { AbateDialog } from './AbateDialog'
 import { LogsDialog } from './LogsDialog'
 import handlePrintPDF from '@/lib/pdf-mesas'
+import { Options } from './Options'
 
 export function MesaCard({ 
   mesa, 
@@ -17,8 +18,8 @@ export function MesaCard({
   onUpdateQuantidade, 
   onRemoveItem, 
   onFinalize, 
-  onAbate, 
-  onCloseMesa 
+  onAbate,
+  loadMesas
 }) {
   const getBalanceColor = (saldo) => saldo > 0 ? 'text-green-600 dark:text-green-400' : saldo < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-600'
   const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
@@ -53,24 +54,10 @@ export function MesaCard({
               </p>
             )}
           </div>
-          <div className="flex gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={printPDF}
-              title="Imprimir Cupom"
-            >
-              <Printer className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onCloseMesa(mesa.id)}
-            >
-              <Trash2 className="w-4 h-4 text-red-600" />
-            </Button>
-          </div>
+          <Options 
+            mesa={mesa}
+            loadMesas={loadMesas}
+         />
         </div>
       </CardHeader>
       <CardContent>
