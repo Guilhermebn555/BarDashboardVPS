@@ -84,7 +84,7 @@ export function AddItemDialog({ mesa, produtos, onAddItem }) {
           <Plus className="w-4 h-4 mr-2" /> Adicionar Item
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[900px] w-[95vw]">
         <DialogHeader>
           <DialogTitle>Adicionar Item - {mesa.nome}</DialogTitle>
         </DialogHeader>
@@ -188,11 +188,13 @@ function Selector({ open, setOpen, items, selectedItem, onSelect, formatCurrency
     <>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="w-full justify-between">
-            {selectedItem ? selectedItem.nome : 'Selecione...'}
+          <Button variant="outline" className="w-full justify-between h-auto py-2">
+            <span className="text-left break-words max-w-[90%]">
+              {selectedItem ? selectedItem.nome : 'Selecione um produto...'}
+            </span>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0">
+        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
           <Command filter={(value, search) => normalizeText(value).includes(normalizeText(search)) ? 1 : 0}>
             <CommandInput placeholder="Buscar produto..." />
             <CommandList className="max-h-64">
@@ -207,11 +209,12 @@ function Selector({ open, setOpen, items, selectedItem, onSelect, formatCurrency
                         setProdutoOpen(false)
                         setQuiloOpen(false)
                       }}
+                      className="flex items-start py-3"
                     >
-                      <Check className={`mr-2 h-4 w-4 ${selectedItem?.id === item.id ? 'opacity-100' : 'opacity-0'}`} />
-                      <div className="flex-1">
-                        <p className="font-medium">{item.nome}</p>
-                        <div className="flex items-center gap-2">
+                      <Check className={`mt-1 mr-2 h-4 w-4 shrink-0 ${selectedItem?.id === item.id ? 'opacity-100' : 'opacity-0'}`} />
+                      <div className="flex flex-col min-w-0">
+                        <p className="font-medium break-words leading-tight">{item.nome}</p>
+                        <div className="flex items-center gap-2 mt-1">
                           <p className="text-sm text-muted-foreground">{formatCurrency(item.preco)}</p>
                         </div>
                       </div>
@@ -223,8 +226,8 @@ function Selector({ open, setOpen, items, selectedItem, onSelect, formatCurrency
         </PopoverContent>
       </Popover>
       {selectedItem && (
-        <div className="mt-2 text-sm">
-          <p className="text-muted-foreground">Preço: {formatCurrency(selectedItem.preco)}</p>
+        <div className="mt-2 text-sm bg-muted/50 p-2 rounded">
+          <p className="text-muted-foreground font-semibold">Preço: {formatCurrency(selectedItem.preco)}</p>
         </div>
       )}
     </>
