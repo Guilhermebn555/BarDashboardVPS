@@ -28,6 +28,10 @@ node_modules/
 
 # Testing
 /coverage
+/lib/itau.js
+/app/itau-pix/page.js
+/app/api/teste-itau/route.js
+/app/api/webhook/pix/route.js
 
 # Next.js
 /.next/
