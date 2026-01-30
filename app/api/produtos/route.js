@@ -41,7 +41,8 @@ export async function POST(request) {
         preco: validData.preco,
         categoria: validData.categoria || null,
         ativo: validData.ativo !== false,
-        valor_taxa: validData.valor_taxa || 0
+        valor_taxa: validData.valor_taxa || 0,
+        isKg: validData.isKg || false
       }])
       .select()
       .single()

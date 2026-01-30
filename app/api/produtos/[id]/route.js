@@ -32,7 +32,8 @@ export async function PUT(request, { params }) {
         preco: validData.preco,
         categoria: validData.categoria,
         ativo: validData.ativo,
-        valor_taxa: validData.valor_taxa || 0
+        valor_taxa: validData.valor_taxa || 0,
+        isKg: validData.isKg || false
       })
       .eq('id', id)
       .select()

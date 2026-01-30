@@ -81,7 +81,8 @@ export default function ProdutosPage() {
           preco: parseFloat(formData.preco),
           categoria: formData.categoria,
           ativo: formData.ativo,
-          valor_taxa: formData.valor_taxa ? parseFloat(formData.valor_taxa) : 0
+          valor_taxa: formData.valor_taxa ? parseFloat(formData.valor_taxa) : 0,
+          isKg: formData.isKg
         })
       })
 

@@ -9,7 +9,6 @@ import { AbateDialog } from './AbateDialog'
 import { LogsDialog } from './LogsDialog'
 import handlePrintPDF from '@/lib/pdf-mesas'
 
-
 export function MesaCard({ 
   mesa, 
   produtos, 
@@ -23,9 +22,13 @@ export function MesaCard({
 }) {
   const getBalanceColor = (saldo) => saldo > 0 ? 'text-green-600 dark:text-green-400' : saldo < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-600'
   const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
+  const formatDate = (date) => new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(date))
 
   const calcularTotal = (itens) => {
-    return itens.reduce((total, item) => total + (item.preco * item.quantidade), 0)
+    return itens.reduce((total, item) => {
+      const valorItem = item.isKg ? parseFloat(item.preco) : (parseFloat(item.preco) * parseInt(item.quantidade));
+      return total + valorItem;
+    }, 0)
   }
 
   const total = calcularTotal(mesa.itens)
@@ -42,7 +45,7 @@ export function MesaCard({
               <LogsDialog mesa={mesa} />
             </div>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              {new Date(mesa.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+              {formatDate(mesa.created_at)}
             </p>
             {mesa.observacoes && (
               <p className="text-sm text-blue-600 dark:text-blue-400 mt-1 italic">
@@ -85,7 +88,9 @@ export function MesaCard({
                   </p>
                   {!item.ehAbatimento ? (
                     <p className="text-sm text-muted-foreground">
-                      {formatCurrency(item.preco)} cada
+                      {item.isKg 
+                        ? `${formatCurrency(item.preco / item.quantidade)} /kg` 
+                        : `${formatCurrency(item.preco)} cada`}
                     </p>
                   ) : (
                     <p className="text-sm text-red-500 dark:text-red-400 italic">
@@ -96,31 +101,39 @@ export function MesaCard({
                 
                 <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
                   {!item.ehAbatimento && (
-                    <div className="flex items-center border rounded-md bg-white dark:bg-gray-900">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8 rounded-none"
-                        onClick={() => onUpdateQuantidade(mesa, item.id, item.quantidade - 1)}
-                        disabled={item.quantidade <= 1}
-                      >
-                        <Minus className="h-3 w-3" />
-                      </Button>
-                      <span className="w-8 text-center text-sm font-medium">{item.quantidade}</span>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8 rounded-none"
-                        onClick={() => onUpdateQuantidade(mesa, item.id, item.quantidade + 1)}
-                      >
-                        <Plus className="h-3 w-3" />
-                      </Button>
-                    </div>
+                    <>
+                      {!item.isKg ? (
+                        <div className="flex items-center border rounded-md bg-white dark:bg-gray-900">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 rounded-none"
+                            onClick={() => onUpdateQuantidade(mesa, item.id, item.quantidade - 1)}
+                            disabled={item.quantidade <= 1}
+                          >
+                            <Minus className="h-3 w-3" />
+                          </Button>
+                          <span className="w-8 text-center text-sm font-medium">{item.quantidade}</span>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 rounded-none"
+                            onClick={() => onUpdateQuantidade(mesa, item.id, item.quantidade + 1)}
+                          >
+                            <Plus className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 rounded text-blue-700 dark:text-blue-300 text-sm font-bold">
+                          {parseFloat(item.quantidade).toFixed(3).replace('.', ',')} kg
+                        </div>
+                      )}
+                    </>
                   )}
 
                   <div className="flex items-center gap-2">
                     <span className={`font-bold min-w-[4rem] text-right ${item.ehAbatimento ? 'text-red-500 dark:text-red-400' : ''}`}>
-                      {formatCurrency(item.preco * item.quantidade)}
+                      {formatCurrency(item.isKg ? item.preco : (item.preco * item.quantidade))}
                     </span>
                     <Button
                       variant="ghost"

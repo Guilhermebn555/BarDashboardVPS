@@ -1,14 +1,13 @@
 'use client'
 
-import { useState } from 'react'
-import { Plus, Minus, Check } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { Plus, Minus, Check, Scale } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Badge } from '@/components/ui/badge'
 import { useConfirmExit } from '@/hooks/useConfirmExit'
 
 const normalizeText = (text) => {
@@ -24,25 +23,55 @@ const normalizeText = (text) => {
 export function AddItemDialog({ mesa, produtos, onAddItem }) {
   const [open, setOpen] = useState(false)
   const [produtoOpen, setProdutoOpen] = useState(false)
+  const [quiloOpen, setQuiloOpen] = useState(false)
+  const [abaAtiva, setAbaAtiva] = useState('cadastrado')
+  
   const [produtoSelecionado, setProdutoSelecionado] = useState(null)
+  const [produtoQuiloSelecionado, setProdutoQuiloSelecionado] = useState(null)
+  
   const [quantidade, setQuantidade] = useState('1')
-  const [modoPersonalizado, setModoPersonalizado] = useState(false)
+  const [pesoInformado, setPesoInformado] = useState('')
   const [produtoPersonalizado, setProdutoPersonalizado] = useState({ nome: '', preco: '' })
+
+  const produtosUnitarios = useMemo(() => produtos.filter(p => !p.isKg), [produtos])
+  const produtosPorQuilo = useMemo(() => produtos.filter(p => p.isKg), [produtos])
 
   const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
 
   const handleConfirm = () => {
-    onAddItem(mesa, {
-      produtoSelecionado,
-      quantidade,
-      modoPersonalizado,
-      produtoPersonalizado
-    })
-    
+    let itemFinal = {}
+
+    if (abaAtiva === 'cadastrado') {
+      itemFinal = { 
+        modo: 'cadastrado',
+        produtoSelecionado: produtoSelecionado, 
+        quantidade: quantidade 
+      }
+    } else if (abaAtiva === 'quilo') {
+      itemFinal = { 
+        modo: 'quilo',
+        produtoSelecionado: produtoQuiloSelecionado, 
+        quantidade: pesoInformado,
+        precoTotal: parseFloat(produtoQuiloSelecionado.preco) * parseFloat(pesoInformado)
+      }
+    } else {
+      itemFinal = { 
+        modo: 'personalizado',
+        produtoPersonalizado: produtoPersonalizado,
+        quantidade: quantidade 
+      }
+    }
+
+    onAddItem(mesa, itemFinal)
+    resetStates()
+  }
+
+  const resetStates = () => {
     setOpen(false)
     setProdutoSelecionado(null)
+    setProdutoQuiloSelecionado(null)
     setQuantidade('1')
-    setModoPersonalizado(false)
+    setPesoInformado('')
     setProdutoPersonalizado({ nome: '', preco: '' })
   }
 
@@ -52,134 +81,96 @@ export function AddItemDialog({ mesa, produtos, onAddItem }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="flex-1">
-          <Plus className="w-4 h-4 mr-2" />
-          Adicionar Item
+          <Plus className="w-4 h-4 mr-2" /> Adicionar Item
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Adicionar Item - {mesa.nome}</DialogTitle>
         </DialogHeader>
+        
         <div className="space-y-4">
-          <div className="flex gap-2">
-            <Button
-              variant={!modoPersonalizado ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setModoPersonalizado(false)}
-            >
-              Produto Cadastrado
+          <div className="flex flex-wrap gap-2">
+            <Button variant={abaAtiva === 'cadastrado' ? 'default' : 'outline'} size="sm" onClick={() => setAbaAtiva('cadastrado')}>
+              Produtos Cadastrados
             </Button>
-            <Button
-              variant={modoPersonalizado ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setModoPersonalizado(true)}
-            >
-              Produto Personalizado
+            <Button variant={abaAtiva === 'quilo' ? 'default' : 'outline'} size="sm" onClick={() => setAbaAtiva('quilo')}>
+              Por Quilo
+            </Button>
+            <Button variant={abaAtiva === 'personalizado' ? 'default' : 'outline'} size="sm" onClick={() => setAbaAtiva('personalizado')}>
+              Personalizado
             </Button>
           </div>
 
-          {!modoPersonalizado ? (
-            <div>
-              <Label>Produto</Label>
-              <Popover open={produtoOpen} onOpenChange={setProdutoOpen}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" role="combobox" className="w-full justify-between">
-                    {produtoSelecionado ? produtoSelecionado.nome : 'Selecione um produto...'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
-                  <Command 
-                    filter={(value, search) => {
-                      const normalizedValue = normalizeText(value)
-                      const normalizedSearch = normalizeText(search)
-                      return normalizedValue.includes(normalizedSearch) ? 1 : 0
-                    }}
-                  >
-                    <CommandInput placeholder="Buscar produto..." />
-                    <CommandList className="max-h-64">
-                      <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
-                      <CommandGroup>
-                        {produtos.map((produto) => (
-                          <CommandItem
-                            key={produto.id}
-                            value={produto.nome}
-                            onSelect={() => {
-                              setProdutoSelecionado(produto)
-                              setProdutoOpen(false)
-                            }}
-                          >
-                            <Check className={`mr-2 h-4 w-4 ${produtoSelecionado?.id === produto.id ? 'opacity-100' : 'opacity-0'}`} />
-                            <div className="flex-1">
-                              <p className="font-medium">{produto.nome}</p>
-                              <div className="flex items-center gap-2">
-                                <p className="text-sm text-muted-foreground">{formatCurrency(produto.preco)}</p>
-                              </div>
-                            </div>
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              {produtoSelecionado && (
-                <div className="mt-2 text-sm">
-                    <p className="text-muted-foreground">Preço: {formatCurrency(produtoSelecionado.preco)}</p>
-                </div>
-              )}
+          {abaAtiva === 'cadastrado' && (
+            <div className="space-y-4">
+              <Label>Selecione o Produto (Unidade)</Label>
+              <Selector 
+                open={produtoOpen} 
+                setOpen={setProdutoOpen} 
+                items={produtosUnitarios} 
+                selectedItem={produtoSelecionado} 
+                onSelect={setProdutoSelecionado} 
+                formatCurrency={formatCurrency}
+                setProdutoOpen={setProdutoOpen}
+                produtoOpen={produtoOpen}
+                setQuiloOpen={setQuiloOpen}
+                quiloOpen={quiloOpen}
+              />
+              <Counter label="Quantidade" value={quantidade} setValue={setQuantidade} />
             </div>
-          ) : (
-            <>
-              <div>
-                <Label htmlFor="nomePers">Nome do Produto *</Label>
-                <Input
-                  id="nomePers"
-                  value={produtoPersonalizado.nome}
-                  onChange={(e) => setProdutoPersonalizado({ ...produtoPersonalizado, nome: e.target.value })}
-                  placeholder="Ex: Cerveja especial"
-                />
-              </div>
-              <div>
-                <Label htmlFor="precoPers">Preço *</Label>
-                <Input
-                  id="precoPers"
-                  type="number"
-                  step="0.01"
-                  value={produtoPersonalizado.preco}
-                  onChange={(e) => setProdutoPersonalizado({ ...produtoPersonalizado, preco: e.target.value })}
-                  placeholder="0.00"
-                />
-              </div>
-            </>
           )}
 
-          <div>
-            <Label htmlFor="quantidade">Quantidade *</Label>
-            <div className="flex gap-2 items-center">
-              <Button variant="outline" size="icon" onClick={() => setQuantidade(Math.max(1, parseInt(quantidade) - 1).toString())}>
-                <Minus className="w-4 h-4" />
-              </Button>
-              <Input
-                id="quantidade"
-                type="number"
-                min="1"
-                value={quantidade}
-                onChange={(e) => setQuantidade(e.target.value)}
-                className="text-center"
+          {abaAtiva === 'quilo' && (
+            <div className="space-y-4">
+              <Label>Selecione o Item (Peso)</Label>
+              <Selector 
+                open={quiloOpen}
+                setOpen={setQuiloOpen}
+                items={produtosPorQuilo}
+                selectedItem={produtoQuiloSelecionado}
+                onSelect={setProdutoQuiloSelecionado}
+                formatCurrency={formatCurrency}
+                isKg={true}
+                setProdutoOpen={setProdutoOpen}
+                produtoOpen={produtoOpen}
+                setQuiloOpen={setQuiloOpen}
+                quiloOpen={quiloOpen}
               />
-              <Button variant="outline" size="icon" onClick={() => setQuantidade((parseInt(quantidade) + 1).toString())}>
-                <Plus className="w-4 h-4" />
-              </Button>
+              <div>
+                <Label htmlFor="peso">Peso (Kg)</Label>
+                <Input 
+                  id="peso" 
+                  type="number" 
+                  step="0.001" 
+                  placeholder="0,000" 
+                  value={pesoInformado} 
+                  onChange={(e) => setPesoInformado(e.target.value)} 
+                />
+              </div>
+              {produtoQuiloSelecionado && pesoInformado && (
+                <p className="text-sm font-bold text-blue-600">
+                  Subtotal: {formatCurrency(produtoQuiloSelecionado.preco * parseFloat(pesoInformado))}
+                </p>
+              )}
             </div>
-          </div>
+          )}
 
-          <Button
+          {abaAtiva === 'personalizado' && (
+            <div className="space-y-3">
+              <Input placeholder="Nome do produto" value={produtoPersonalizado.nome} onChange={(e) => setProdutoPersonalizado({...produtoPersonalizado, nome: e.target.value})} />
+              <Input type="number" placeholder="Preço" value={produtoPersonalizado.preco} onChange={(e) => setProdutoPersonalizado({...produtoPersonalizado, preco: e.target.value})} />
+              <Counter label="Quantidade" value={quantidade} setValue={setQuantidade} />
+            </div>
+          )}
+
+          <Button 
+            className="w-full" 
             onClick={handleConfirm}
-            className="w-full"
             disabled={
-              modoPersonalizado
-                ? !produtoPersonalizado.nome || !produtoPersonalizado.preco || parseFloat(produtoPersonalizado.preco) <= 0
-                : !produtoSelecionado || !quantidade || parseInt(quantidade) <= 0
+              (abaAtiva === 'cadastrado' && !produtoSelecionado) ||
+              (abaAtiva === 'quilo' && (!produtoQuiloSelecionado || !pesoInformado)) ||
+              (abaAtiva === 'personalizado' && (!produtoPersonalizado.nome || !produtoPersonalizado.preco))
             }
           >
             Adicionar
@@ -187,5 +178,68 @@ export function AddItemDialog({ mesa, produtos, onAddItem }) {
         </div>
       </DialogContent>
     </Dialog>
+  )
+}
+
+
+
+function Selector({ open, setOpen, items, selectedItem, onSelect, formatCurrency, isKg = false, setProdutoOpen, produtoOpen, setQuiloOpen, quiloOpen }) {
+  return (
+    <>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="outline" className="w-full justify-between">
+            {selectedItem ? selectedItem.nome : 'Selecione...'}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-full p-0">
+          <Command filter={(value, search) => normalizeText(value).includes(normalizeText(search)) ? 1 : 0}>
+            <CommandInput placeholder="Buscar produto..." />
+            <CommandList className="max-h-64">
+              <CommandEmpty>Nada encontrado.</CommandEmpty>
+              <CommandGroup>
+                {items.map((item) => (
+                  <CommandItem
+                      key={item.id}
+                      value={item.nome}
+                      onSelect={() => {
+                        onSelect(item)
+                        setProdutoOpen(false)
+                        setQuiloOpen(false)
+                      }}
+                    >
+                      <Check className={`mr-2 h-4 w-4 ${selectedItem?.id === item.id ? 'opacity-100' : 'opacity-0'}`} />
+                      <div className="flex-1">
+                        <p className="font-medium">{item.nome}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm text-muted-foreground">{formatCurrency(item.preco)}</p>
+                        </div>
+                      </div>
+                    </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+      {selectedItem && (
+        <div className="mt-2 text-sm">
+          <p className="text-muted-foreground">Preço: {formatCurrency(selectedItem.preco)}</p>
+        </div>
+      )}
+    </>
+  )
+}
+
+function Counter({ label, value, setValue }) {
+  return (
+    <div>
+      <Label>{label}</Label>
+      <div className="flex gap-2">
+        <Button variant="outline" size="icon" onClick={() => setValue(Math.max(1, parseInt(value) - 1).toString())}><Minus className="h-4 w-4"/></Button>
+        <Input className="text-center" value={value} onChange={(e) => setValue(e.target.value)} />
+        <Button variant="outline" size="icon" onClick={() => setValue((parseInt(value) + 1).toString())}><Plus className="h-4 w-4"/></Button>
+      </div>
+    </div>
   )
 }

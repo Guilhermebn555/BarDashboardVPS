@@ -80,56 +80,74 @@ export default function MesasPage() {
     }
   }
 
-  const handleAdicionarItem = async (mesa, { produtoSelecionado, quantidade, modoPersonalizado, produtoPersonalizado }) => {
-    let novoItem
-    let logMsg
+  const handleAdicionarItem = async (mesa, dados) => {
+  const { 
+    modo, 
+    produtoSelecionado, 
+    quantidade, 
+    produtoPersonalizado, 
+    precoTotal
+  } = dados
 
-    if (modoPersonalizado) {
-      novoItem = {
-        id: Date.now().toString(),
-        nome: produtoPersonalizado.nome,
-        preco: parseFloat(produtoPersonalizado.preco),
-        quantidade: parseInt(quantidade),
-        ehAbatimento: false
-      }
-      logMsg = `Adicionou ${quantidade}x ${produtoPersonalizado.nome} (Manual)`
-    } else {
-      let precoFinal = produtoSelecionado.preco
+  let novoItem
+  let logMsg
 
-      novoItem = {
-        id: Date.now().toString(),
-        produto_id: produtoSelecionado.id,
-        nome: produtoSelecionado.nome,
-        preco: precoFinal, 
-        quantidade: parseInt(quantidade),
-        ehAbatimento: false
-      }
-      
-      logMsg = `Adicionou ${quantidade}x ${produtoSelecionado.nome}`
+  if (modo === 'personalizado') {
+    novoItem = {
+      id: Date.now().toString(),
+      nome: produtoPersonalizado.nome,
+      preco: parseFloat(produtoPersonalizado.preco),
+      quantidade: parseInt(quantidade),
+      ehAbatimento: false
     }
-
-    try {
-      const itensAtualizados = [...mesa.itens, novoItem]
-      const logsAtualizados = [...(mesa.logs || []), gerarLog(logMsg, 'add')]
-
-      const res = await fetch(`/api/mesas/${mesa.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nome: mesa.nome,
-          itens: itensAtualizados,
-          observacoes: mesa.observacoes,
-          logs: logsAtualizados
-        })
-      })
-
-      if (res.ok) {
-        await loadMesas()
-      }
-    } catch (error) {
-      console.error('Error adding item:', error)
+    logMsg = `Adicionou ${quantidade}x ${produtoPersonalizado.nome} (Manual)`
+  } 
+  else if (modo === 'quilo') {
+    novoItem = {
+      id: Date.now().toString(),
+      produto_id: produtoSelecionado?.id,
+      nome: produtoSelecionado?.nome,
+      preco: parseFloat(precoTotal), 
+      quantidade: parseFloat(quantidade),
+      ehAbatimento: false,
+      isKg: true
     }
+    logMsg = `Adicionou ${quantidade}kg de ${produtoSelecionado?.nome}`
+  } 
+  else {
+    novoItem = {
+      id: Date.now().toString(),
+      produto_id: produtoSelecionado?.id,
+      nome: produtoSelecionado?.nome,
+      preco: parseFloat(produtoSelecionado?.preco),
+      quantidade: parseInt(quantidade),
+      ehAbatimento: false
+    }
+    logMsg = `Adicionou ${quantidade}x ${produtoSelecionado?.nome}`
   }
+
+  try {
+    const itensAtualizados = [...(mesa.itens || []), novoItem]
+    const logsAtualizados = [...(mesa.logs || []), gerarLog(logMsg, 'add')]
+
+    const res = await fetch(`/api/mesas/${mesa.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nome: mesa.nome,
+        itens: itensAtualizados,
+        observacoes: mesa.observacoes,
+        logs: logsAtualizados
+      })
+    })
+
+    if (res.ok) {
+      await loadMesas()
+    }
+  } catch (error) {
+    console.error('Erro ao adicionar item:', error)
+  }
+}
 
   const handleUpdateQuantidade = async (mesa, itemId, novaQuantidade) => {
     try {
