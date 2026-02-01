@@ -1,86 +1,163 @@
 'use client'
 
-import { useState } from 'react'
-import { DollarSign } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Ban, Banknote, CreditCard, QrCode, ArrowDown, Wallet } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
 
 export function AbateDialog({ mesa, total, onAbate }) {
   const [open, setOpen] = useState(false)
   const [valorAbater, setValorAbater] = useState('')
-  const [metodoPagamentoAbater, setMetodoPagamentoAbater] = useState('dinheiro')
+  const [metodoPagamento, setMetodoPagamento] = useState('dinheiro')
 
   const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
+
+  useEffect(() => {
+    if (!open) {
+      setValorAbater('')
+      setMetodoPagamento('dinheiro')
+    }
+  }, [open])
 
   const handleConfirm = () => {
     onAbate(mesa, {
       valorAbater,
-      metodoPagamentoAbater,
+      metodoPagamentoAbater: metodoPagamento,
       total
     })
     setOpen(false)
-    setValorAbater('')
-    setMetodoPagamentoAbater('dinheiro')
   }
+
+  // Cálculos para feedback visual
+  const valorNum = parseFloat(valorAbater) || 0
+  const novoSaldo = total - valorNum
+  const isValorValido = valorNum > 0
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="secondary" size="sm" className="flex-1">
-          <DollarSign className="w-4 h-4 mr-2" />
-          Abater
+        <Button variant="outline" className="h-12 border-dashed border-orange-300 hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/20 text-orange-600 dark:text-orange-400">
+          <Ban className="mr-2 w-4 h-4" /> Abater
         </Button>
       </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Abater Valor - {mesa.nome}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded">
-            <p className="text-sm text-muted-foreground mb-1">Valor Atual:</p>
-            <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-              {formatCurrency(total)}
+      
+      <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden bg-slate-50 dark:bg-slate-950 border-none shadow-2xl">
+        
+        {/* HEADER */}
+        <div className="bg-orange-500 text-white p-6">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl font-bold">
+              <div className="bg-white/20 p-2 rounded-lg">
+                <Ban className="w-6 h-6 text-white" />
+              </div>
+              Abater da Conta de {mesa.nome}
+            </DialogTitle>
+            <p className="text-orange-100 text-sm mt-1 opacity-90">
+              Registre pagamentos parciais ou adiantamentos.
             </p>
+          </DialogHeader>
+        </div>
+
+        <div className="p-6 space-y-6">
+          
+          {/* CARD DE SALDO ATUAL */}
+          <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+             <div>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Saldo Devedor</p>
+                <p className="text-2xl font-black text-slate-700 dark:text-slate-200">
+                    {formatCurrency(total)}
+                </p>
+             </div>
+             <div className="bg-slate-100 dark:bg-slate-800 p-2 rounded-full">
+                <Wallet className="w-6 h-6 text-slate-400" />
+             </div>
           </div>
 
-          <div>
-            <Label htmlFor="valorAbater">Valor a Abater *</Label>
-            <Input
-              id="valorAbater"
-              type="number"
-              step="0.01"
-              value={valorAbater}
-              onChange={(e) => setValorAbater(e.target.value)}
-              placeholder="0.00"
-            />
+          {/* INPUT DE VALOR */}
+          <div className="space-y-3">
+             <Label className="text-xs font-bold text-slate-500 uppercase">Valor a Abater</Label>
+             <div className="relative group">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-500 font-bold text-xl">R$</span>
+                <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="0,00"
+                    value={valorAbater}
+                    onChange={(e) => setValorAbater(e.target.value)}
+                    className="h-16 pl-12 text-3xl font-black bg-white dark:bg-slate-900 border-2 border-slate-200 focus-visible:border-orange-500 focus-visible:ring-0 transition-all rounded-xl"
+                />
+             </div>
           </div>
 
-          <div>
-            <Label>Método de Pagamento *</Label>
-            <Select value={metodoPagamentoAbater} onValueChange={setMetodoPagamentoAbater}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="dinheiro">Dinheiro</SelectItem>
-                <SelectItem value="pix">PIX</SelectItem>
-                <SelectItem value="cartao">Cartão</SelectItem>
-              </SelectContent>
-            </Select>
+          {/* SELEÇÃO DE MÉTODO (GRID) */}
+          <div className="space-y-3">
+             <Label className="text-xs font-bold text-slate-500 uppercase">Forma de Pagamento</Label>
+             <div className="grid grid-cols-3 gap-3">
+                <MethodButton 
+                    active={metodoPagamento === 'dinheiro'} 
+                    onClick={() => setMetodoPagamento('dinheiro')}
+                    icon={Banknote}
+                    label="Dinheiro"
+                />
+                <MethodButton 
+                    active={metodoPagamento === 'pix'} 
+                    onClick={() => setMetodoPagamento('pix')}
+                    icon={QrCode}
+                    label="PIX"
+                />
+                <MethodButton 
+                    active={metodoPagamento === 'cartao'} 
+                    onClick={() => setMetodoPagamento('cartao')}
+                    icon={CreditCard}
+                    label="Cartão"
+                />
+             </div>
           </div>
+
+          {/* PREVIEW DO RESULTADO */}
+          {valorNum > 0 && (
+             <div className="bg-orange-50 dark:bg-orange-950/20 p-4 rounded-xl border border-orange-100 dark:border-orange-900/30 animate-in fade-in slide-in-from-top-2">
+                <div className="flex justify-between items-center text-sm">
+                    <span className="text-slate-500">Saldo Restante:</span>
+                    <span className="font-bold text-slate-900 dark:text-white">{formatCurrency(novoSaldo)}</span>
+                </div>
+                {novoSaldo < 0 && (
+                    <p className="text-xs text-red-500 font-bold mt-1 text-right">Atenção: Valor excede a conta!</p>
+                )}
+             </div>
+          )}
+
+          <Separator />
 
           <Button
             onClick={handleConfirm}
-            className="w-full"
-            disabled={!valorAbater}
+            className="w-full h-14 text-lg font-bold bg-orange-600 hover:bg-orange-700 text-white shadow-lg shadow-orange-900/20 active:scale-95 transition-all"
+            disabled={!isValorValido}
           >
-            Confirmar e Abater
+            Confirmar Abatimento <ArrowDown className="ml-2 w-5 h-5" />
           </Button>
+
         </div>
       </DialogContent>
     </Dialog>
   )
+}
+
+function MethodButton({ active, onClick, icon: Icon, label }) {
+    return (
+        <button
+            onClick={onClick}
+            className={`flex flex-col items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all duration-200 ${
+                active 
+                ? 'bg-orange-50 border-orange-500 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400' 
+                : 'bg-white border-slate-100 text-slate-500 hover:border-orange-200 hover:bg-orange-50/50 dark:bg-slate-900 dark:border-slate-800'
+            }`}
+        >
+            <Icon className={`w-6 h-6 ${active ? 'fill-current' : ''}`} />
+            <span className="text-xs font-bold">{label}</span>
+        </button>
+    )
 }

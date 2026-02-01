@@ -3,6 +3,7 @@
 import { ShoppingBag } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { MesaCard } from './MesaCard'
+import { useState } from 'react'
 
 export function MesaList({ 
   mesas, 
@@ -15,7 +16,8 @@ export function MesaList({
   onAbate, 
   onCloseMesa,
   onRefresh,
-  loadMesas
+  loadMesas,
+  onMesaClick
 }) {
   if (mesas.length === 0) {
     return (
@@ -44,6 +46,7 @@ export function MesaList({
           onCloseMesa={onCloseMesa}
           onRefresh={onRefresh}
           loadMesas={loadMesas}
+          onClick={onMesaClick}
         />
       ))}
     </div>

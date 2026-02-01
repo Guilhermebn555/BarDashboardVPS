@@ -8,12 +8,16 @@ import { ThemeToggle } from '@/components/theme-toggle'
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader'
 import { NewMesaDialog } from './components/NewMesaDialog'
 import { MesaList } from './components/MesaList'
+import { MesaWorkspace } from './components/MesaWorkspace'
 
 export default function MesasPage() {
   const router = useRouter()
   const [mesas, setMesas] = useState([])
   const [produtos, setProdutos] = useState([])
   const [clientes, setClientes] = useState([])
+  const [mesaFocadaId, setMesaFocadaId] = useState(null)
+
+  const mesaFocada = mesas.find(m => m.id === mesaFocadaId)
 
   useEffect(() => {
     loadProdutos()
@@ -280,6 +284,9 @@ export default function MesasPage() {
           })
         })
 
+        setMesaFocadaId(null)
+        await loadMesas()
+
         alert('Consumo registrado na caderneta do cliente!')
       } catch (error) {
         console.error('Error registering purchase:', error)
@@ -306,6 +313,38 @@ export default function MesasPage() {
     } catch (error) {
       console.error('Error finalizing mesa:', error)
     }
+  }
+
+  const onMesaClick = (mesa) => {
+    setMesaFocadaId(mesa.id)
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const onVoltar = () => {
+    setMesaFocadaId(null)
+  }
+
+  if (mesaFocada) {
+    return (
+      <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+        <div className="mb-4">
+            <Button variant="ghost" onClick={onVoltar}>← Voltar para Mesas</Button>
+        </div>
+
+        <MesaWorkspace 
+          mesa={mesaFocada} 
+          onBack={onVoltar}
+          produtos={produtos}
+          onAbate={handleAbater}
+          onAddItem={handleAdicionarItem}
+          onFinalize={handleFinalize}
+          onRemoveItem={handleRemoverItem}
+          clientes={clientes}
+          onUpdateQuantidade={handleUpdateQuantidade}
+        />
+      </div>
+    )
   }
 
   return (
@@ -338,6 +377,8 @@ export default function MesasPage() {
           onFinalize={handleFinalize}
           onAbate={handleAbater}
           loadMesas={loadMesas}
+          onMesaClick={onMesaClick}
+          onVoltar={onVoltar}
         />
       </main>
     </div>
