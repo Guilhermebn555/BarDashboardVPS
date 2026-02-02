@@ -328,10 +328,6 @@ export default function MesasPage() {
   if (mesaFocada) {
     return (
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
-        <div className="mb-4">
-            <Button variant="ghost" onClick={onVoltar}>← Voltar para Mesas</Button>
-        </div>
-
         <MesaWorkspace 
           mesa={mesaFocada} 
           onBack={onVoltar}

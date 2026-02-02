@@ -1,4 +1,3 @@
-// components/MesaDialog.jsx
 'use client'
 
 import * as React from "react"
@@ -31,7 +30,7 @@ export function MesaDialog({ mesa, isOpen, onOpenChange }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] max-h-[85vh] p-0 overflow-hidden border-none shadow-2xl">
+      <DialogContent className="sm:max-w-[700px] max-h-[85dvh] p-0 overflow-hidden border-none shadow-2xl">
         <div className="bg-slate-950 text-white p-6">
           <div className="flex justify-between items-start mb-4">
             <div>

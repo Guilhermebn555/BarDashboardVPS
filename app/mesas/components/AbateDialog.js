@@ -31,7 +31,6 @@ export function AbateDialog({ mesa, total, onAbate }) {
     setOpen(false)
   }
 
-  // Cálculos para feedback visual
   const valorNum = parseFloat(valorAbater) || 0
   const novoSaldo = total - valorNum
   const isValorValido = valorNum > 0
@@ -46,7 +45,6 @@ export function AbateDialog({ mesa, total, onAbate }) {
       
       <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden bg-slate-50 dark:bg-slate-950 border-none shadow-2xl">
         
-        {/* HEADER */}
         <div className="bg-orange-500 text-white p-6">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl font-bold">
@@ -63,7 +61,6 @@ export function AbateDialog({ mesa, total, onAbate }) {
 
         <div className="p-6 space-y-6">
           
-          {/* CARD DE SALDO ATUAL */}
           <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
              <div>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Saldo Devedor</p>
@@ -76,7 +73,6 @@ export function AbateDialog({ mesa, total, onAbate }) {
              </div>
           </div>
 
-          {/* INPUT DE VALOR */}
           <div className="space-y-3">
              <Label className="text-xs font-bold text-slate-500 uppercase">Valor a Abater</Label>
              <div className="relative group">
@@ -92,7 +88,6 @@ export function AbateDialog({ mesa, total, onAbate }) {
              </div>
           </div>
 
-          {/* SELEÇÃO DE MÉTODO (GRID) */}
           <div className="space-y-3">
              <Label className="text-xs font-bold text-slate-500 uppercase">Forma de Pagamento</Label>
              <div className="grid grid-cols-3 gap-3">
@@ -117,7 +112,6 @@ export function AbateDialog({ mesa, total, onAbate }) {
              </div>
           </div>
 
-          {/* PREVIEW DO RESULTADO */}
           {valorNum > 0 && (
              <div className="bg-orange-50 dark:bg-orange-950/20 p-4 rounded-xl border border-orange-100 dark:border-orange-900/30 animate-in fade-in slide-in-from-top-2">
                 <div className="flex justify-between items-center text-sm">

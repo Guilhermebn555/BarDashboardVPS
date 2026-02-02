@@ -14,7 +14,6 @@ export function NewPixDialog({ produtos, onSuccess }) {
   const [nomeCliente, setNomeCliente] = useState('')
   const [itensCompra, setItensCompra] = useState([])
   
-  // Estados do formulário de item
   const [produtoOpen, setProdutoOpen] = useState(false)
   const [produtoSelecionado, setProdutoSelecionado] = useState(null)
   const [quantidade, setQuantidade] = useState('1')
@@ -80,7 +79,7 @@ export function NewPixDialog({ produtos, onSuccess }) {
       })
 
       if (res.ok) {
-        onSuccess() // Recarrega a lista no pai
+        onSuccess()
         setOpen(false)
         setNomeCliente('')
         setItensCompra([])
