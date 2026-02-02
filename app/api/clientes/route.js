@@ -1,33 +1,29 @@
 import { NextResponse } from 'next/server'
 import { getServerSupabase } from '@/lib/supabase'
 import { clienteSchema } from '@/lib/validation'
-import { calculateBalance, sanitizeError } from '@/lib/api-utils'
-
-const supabase = getServerSupabase()
+import { sanitizeError } from '@/lib/api-utils'
 
 export async function GET(request) {
+  const supabase = getServerSupabase()
+
   try {
     const { data, error } = await supabase
-      .from('clientes')
+      .from('clientes_com_saldo') 
       .select('*')
       .order('nome')
 
     if (error) throw error
 
-    const clientesComSaldo = await Promise.all(
-      data.map(async (cliente) => {
-        const saldo = await calculateBalance(cliente.id)
-        return { ...cliente, saldo }
-      })
-    )
+    return NextResponse.json({ clientes: data })
 
-    return NextResponse.json({ clientes: clientesComSaldo })
   } catch (error) {
     return NextResponse.json({ error: sanitizeError(error) }, { status: 500 })
   }
 }
 
 export async function POST(request) {
+  const supabase = getServerSupabase()
+
   try {
     const body = await request.json()
     const validationResult = clienteSchema.safeParse(body)
