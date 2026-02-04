@@ -48,22 +48,19 @@ export function FinalizeDialog({ mesa, clientes, total, onFinalize }) {
     setOpen(false)
   }
 
-  const themeColor = tipoPagamento === 'vista' ? 'emerald' : 'amber'
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button 
-            className="w-full h-16 text-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-xl shadow-emerald-900/20 transition-all active:scale-95"
+            className="w-full h-13 text-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-xl shadow-emerald-900/20 transition-all active:scale-95"
             disabled={mesa.itens.length === 0}
         >
           <CheckCircle2 className="mr-3 w-6 h-6" /> Finalizar Conta
         </Button>
       </DialogTrigger>
-      
-      <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden bg-slate-50 dark:bg-slate-950 border-none shadow-2xl">
+      <DialogContent className="sm:max-w-[600px] w-full max-h-[95vh] p-0 overflow-hidden bg-slate-50 dark:bg-slate-950 border-none shadow-2xl flex flex-col">
         
-        <div className={`p-6 transition-colors duration-300 ${
+        <div className={`p-6 shrink-0 transition-colors duration-300 ${
             tipoPagamento === 'vista' ? 'bg-emerald-600' : 'bg-amber-500'
         }`}>
             <DialogHeader>
@@ -71,7 +68,7 @@ export function FinalizeDialog({ mesa, clientes, total, onFinalize }) {
                     <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
                         {tipoPagamento === 'vista' ? <Wallet className="w-6 h-6" /> : <NotebookPen className="w-6 h-6" />}
                     </div>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col text-left">
                         <span className="text-xl font-bold">Finalizar Conta de {mesa.nome}</span>
                         <span className="text-sm font-normal opacity-90 text-white">
                             {tipoPagamento === 'vista' ? 'Recebimento imediato' : 'Registrar na conta do cliente'}
@@ -81,7 +78,7 @@ export function FinalizeDialog({ mesa, clientes, total, onFinalize }) {
             </DialogHeader>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 flex-1 overflow-y-auto">
 
             <div className="flex flex-col items-center justify-center p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total a Receber</span>
@@ -145,7 +142,7 @@ export function FinalizeDialog({ mesa, clientes, total, onFinalize }) {
                 )}
 
                 {tipoPagamento === 'fiado' && (
-                    <div className="space-y-4">
+                    <div className="space-y-4 pb-2"> {/* Adicionado pb-2 para espaço extra no scroll */}
                         <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 p-3 rounded-lg flex gap-3 items-start">
                             <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                             <p className="text-sm text-amber-800 dark:text-amber-200">
@@ -186,9 +183,9 @@ export function FinalizeDialog({ mesa, clientes, total, onFinalize }) {
                     </div>
                 )}
             </div>
+        </div>
 
-            <Separator />
-
+        <div className="p-6 pt-2 bg-slate-50 dark:bg-slate-950 shrink-0">
             <Button
                 onClick={handleConfirm}
                 className={`w-full h-14 text-lg font-bold text-white shadow-lg transition-all active:scale-95 ${
@@ -204,8 +201,8 @@ export function FinalizeDialog({ mesa, clientes, total, onFinalize }) {
                     <> <NotebookPen className="mr-2 w-6 h-6" /> Registrar na Caderneta </>
                 )}
             </Button>
-
         </div>
+
       </DialogContent>
     </Dialog>
   )

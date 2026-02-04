@@ -18,7 +18,7 @@ export function DeleteMesaDialog({ mesa, onDelete }) {
       <DialogTrigger asChild>
         <Button 
             variant="outline"
-            className="w-full h-14 text-lg font-bold border-2 border-rose-100 text-rose-600 hover:bg-rose-50 hover:border-rose-200 dark:border-rose-900/30 dark:text-rose-400 dark:hover:bg-rose-950/20 transition-all active:scale-95 mb-3"
+            className="w-full h-12 text-lg font-bold border-2 border-rose-100 text-rose-600 hover:bg-rose-50 hover:border-rose-200 dark:border-rose-900/30 dark:text-rose-400 dark:hover:bg-rose-950/20 transition-all active:scale-95 mb-3"
         >
           <Trash2 className="mr-2 w-5 h-5" /> Cancelar / Excluir Mesa
         </Button>
