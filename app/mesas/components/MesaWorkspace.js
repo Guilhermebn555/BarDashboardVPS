@@ -223,7 +223,7 @@ export function MesaWorkspace({
               <AbateDialog mesa={mesa} onAbate={onAbate} total={total}/>
               <Button 
                 variant="outline" 
-                onClick={() => {handlePrintPDF(mesa, produtos); window.scrollTo({ top: 0, behavior: 'smooth' })}} 
+                onClick={() => {handlePrintPDF(mesa, total); window.scrollTo({ top: 0, behavior: 'smooth' })}} 
                 className="h-12 border-dashed border-gray-400 hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-950/20 text-gray-600 dark:text-gray-300"
               >
                 <Printer className="mr-2 w-3 h-3 lg:w-4 lg:h-4 text-slate-500" /> Imprimir
