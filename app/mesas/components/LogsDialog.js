@@ -16,10 +16,7 @@ import { Badge } from '@/components/ui/badge'
 
 export function LogsDialog({ mesa }) {
   
-  const formatHoraLog = (dateString) => {
-    if (!dateString) return '--:--'
-    return new Date(dateString).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-  }
+  const formatTime = (date) => new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(date))
 
   const getLogStyle = (tipo) => {
     switch (tipo) {
@@ -117,7 +114,7 @@ export function LogsDialog({ mesa }) {
 
                          <div className="flex items-center gap-1 text-[10px] font-mono font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded shrink-0">
                             <Clock className="w-3 h-3" />
-                            {formatHoraLog(log.data)}
+                            {formatTime(log.data)}
                          </div>
                       </div>
                     </div>

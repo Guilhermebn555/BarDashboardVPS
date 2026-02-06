@@ -43,9 +43,9 @@ export function AbateDialog({ mesa, total, onAbate }) {
         </Button>
       </DialogTrigger>
       
-      <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden bg-slate-50 dark:bg-slate-950 border-none shadow-2xl">
+      <DialogContent className="w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-0 bg-slate-50 dark:bg-slate-950 border-none shadow-2xl">
         
-        <div className="bg-orange-500 text-white p-6">
+        <div className="bg-orange-500 text-white p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl font-bold">
               <div className="bg-white/20 p-2 rounded-lg">
@@ -59,7 +59,7 @@ export function AbateDialog({ mesa, total, onAbate }) {
           </DialogHeader>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 p-4 sm:p-6">
           
           <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
              <div>
@@ -83,7 +83,7 @@ export function AbateDialog({ mesa, total, onAbate }) {
                     placeholder="0,00"
                     value={valorAbater}
                     onChange={(e) => setValorAbater(e.target.value)}
-                    className="h-16 pl-12 text-3xl font-black bg-white dark:bg-slate-900 border-2 border-slate-200 focus-visible:border-orange-500 focus-visible:ring-0 transition-all rounded-xl"
+                    className="h-14 sm:h-16 pl-10 sm:pl-12 text-2xl sm:text-3xl font-black bg-white dark:bg-slate-900 border-2 border-slate-200 focus-visible:border-orange-500 focus-visible:ring-0 transition-all rounded-xl"
                 />
              </div>
           </div>
@@ -141,17 +141,17 @@ export function AbateDialog({ mesa, total, onAbate }) {
 }
 
 function MethodButton({ active, onClick, icon: Icon, label }) {
-    return (
-        <button
-            onClick={onClick}
-            className={`flex flex-col items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all duration-200 ${
-                active 
-                ? 'bg-orange-50 border-orange-500 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400' 
-                : 'bg-white border-slate-100 text-slate-500 hover:border-orange-200 hover:bg-orange-50/50 dark:bg-slate-900 dark:border-slate-800'
-            }`}
-        >
-            <Icon className={`w-6 h-6 ${active ? 'fill-current' : ''}`} />
-            <span className="text-xs font-bold">{label}</span>
-        </button>
-    )
+  return (
+    <button
+      onClick={onClick}
+      className={`flex flex-col items-center justify-center gap-2 p-2 sm:p-3 rounded-xl border-2 transition-all duration-200 ${
+        active 
+        ? 'bg-orange-50 border-orange-500 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400' 
+        : 'bg-white border-slate-100 text-slate-500 hover:border-orange-200 hover:bg-orange-50/50 dark:bg-slate-900 dark:border-slate-800'
+      }`}
+    >
+      <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${active ? 'fill-current' : ''}`} />
+      <span className="text-[10px] sm:text-xs font-bold text-center leading-tight">{label}</span>
+    </button>
+  )
 }
