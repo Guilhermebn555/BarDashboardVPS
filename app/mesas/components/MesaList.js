@@ -19,6 +19,10 @@ export function MesaList({
   loadMesas,
   onMesaClick
 }) {
+  const mesasOrdenadas = [...mesas].sort((a, b) => {
+    return (a.nome || '').localeCompare(b.nome || '', undefined, { numeric: true })
+  })
+
   if (mesas.length === 0) {
     return (
       <Card>
@@ -32,7 +36,7 @@ export function MesaList({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {mesas.map((mesa) => (
+      {mesasOrdenadas.map((mesa) => (
         <MesaCard
           key={mesa.id}
           mesa={mesa}
