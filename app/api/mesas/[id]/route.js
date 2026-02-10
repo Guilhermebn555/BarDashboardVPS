@@ -50,6 +50,51 @@ export async function PUT(request, { params }) {
   }
 }
 
+export async function PATCH(request, { params }) {
+  const { id } = params
+
+  const idValidation = uuidSchema.safeParse(id)
+  if (!idValidation.success) {
+    return NextResponse.json({ error: 'ID inválido' }, { status: 400 })
+  }
+
+  try {
+    const body = await request.json()
+
+    const validationResult = mesaSchema.partial().safeParse(body)
+
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { error: 'Dados inválidos', details: validationResult.error.errors },
+        { status: 400 }
+      )
+    }
+
+    const validData = validationResult.data
+
+    if (Object.keys(validData).length === 0) {
+      return NextResponse.json({ message: 'Nenhum dado para atualizar' }, { status: 400 })
+    }
+    const { data, error } = await supabase
+      .from('mesas')
+      .update(validData) 
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Mesa não encontrada' }, { status: 404 })
+      }
+      throw error
+    }
+
+    return NextResponse.json({ mesa: data })
+  } catch (error) {
+    return NextResponse.json({ error: sanitizeError(error) }, { status: 500 })
+  }
+}
+
 export async function DELETE(request, { params }) {
   const { id } = params
 

@@ -211,6 +211,19 @@ export default function MesasPage() {
     }
   }
 
+  const handleUpdateMesa = async (mesaId, dados) => {
+    
+    const response = await fetch(`/api/mesas/${mesaId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(dados),
+        headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (response.ok) {
+      loadMesas();
+    }
+}
+
   const handleAbater = async (mesa, { valorAbater, metodoPagamentoAbater, total }) => {
     const valor = parseFloat(valorAbater)
 
@@ -338,6 +351,7 @@ export default function MesasPage() {
           onRemoveItem={handleRemoverItem}
           clientes={clientes}
           onUpdateQuantidade={handleUpdateQuantidade}
+          onUpdateMesa={handleUpdateMesa}
         />
       </div>
     )

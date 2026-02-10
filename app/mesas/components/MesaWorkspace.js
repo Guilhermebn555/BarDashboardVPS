@@ -7,7 +7,7 @@ import {
   Printer,
   Minus,
   Clock, 
-  Utensils 
+  Utensils,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -19,6 +19,8 @@ import handlePrintPDF from '@/lib/pdf-mesas'
 import { FinalizeDialog } from './FinalizeDialog'
 import { LogsDialog } from './LogsDialog'
 import { DeleteMesaDialog } from './DeleteDialog'
+import { EditMesaDialog } from './EditMesaDialog'
+import { MesaObservacoes } from './MesaObservacoes'
 
 export function MesaWorkspace({ 
   mesa, 
@@ -29,7 +31,8 @@ export function MesaWorkspace({
   onRemoveItem,
   produtos,
   clientes,
-  onUpdateQuantidade
+  onUpdateQuantidade,
+  onUpdateMesa
 }) {
   const formatCurrency = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v)
   const formatTime = (date) => new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(date))
@@ -38,6 +41,10 @@ export function MesaWorkspace({
     const val = item.isKg ? parseFloat(item.preco) : (item.preco * item.quantidade)
     return acc + val
   }, 0)
+
+  const handleSaveObs = async (novaObs) => {
+    await onUpdateMesa(mesa.id, { observacoes: novaObs })
+  }
 
   return (
     <div className="flex flex-col h-[100dvh] bg-slate-50 dark:bg-slate-950 rounded-none md:rounded-xl border-0 md:border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden animate-in slide-in-from-bottom-2 duration-300">
@@ -58,25 +65,24 @@ export function MesaWorkspace({
               <h1 className="text-lg md:text-2xl font-black tracking-tight text-slate-900 dark:text-white truncate">
                 {mesa.nome}
               </h1>
+              <EditMesaDialog mesa={mesa} onUpdate={onUpdateMesa} />
               <Badge className="bg-emerald-500 hover:bg-emerald-600 text-white border-0 text-[10px] md:text-xs shrink-0">
                 Aberta
               </Badge>
-            </div>
-            <div className="flex items-center gap-2 text-xs md:text-sm text-slate-500 font-medium truncate">
-              <Clock className="w-3 h-3 md:w-4 md:h-4" />
-              <span className="truncate">Início: {formatTime(mesa.created_at)}</span>
             </div>
           </div>
         </div>
 
         <div className="hidden md:flex items-center gap-2">
-            <span className="text-sm text-slate-400">ID #{mesa.id}</span>
+            <Clock className="text-slate-500 w-3 h-3 md:w-4 md:h-4" />
+            <span className="text-slate-500 truncate">Início: {formatTime(mesa.created_at)}</span>
         </div>
       </div>
 
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         
         <div className="flex-1 flex flex-col min-h-0 min-w-0 bg-white dark:bg-slate-950/50 order-1 lg:order-1">
+          <MesaObservacoes observacoesIniciais={mesa.observacoes} onSave={handleSaveObs} />
           <div className="px-4 py-2 bg-slate-50/80 dark:bg-slate-900/50 border-b text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider flex justify-between shrink-0">
             <span>Itens ({mesa.itens.length})</span>
             <span>Subtotal</span>
