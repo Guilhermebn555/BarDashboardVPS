@@ -32,7 +32,8 @@ export function MesaWorkspace({
   produtos,
   clientes,
   onUpdateQuantidade,
-  onUpdateMesa
+  onUpdateMesa,
+  loadMesas
 }) {
   const formatCurrency = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v)
   const formatTime = (date) => new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(date))
@@ -44,6 +45,7 @@ export function MesaWorkspace({
 
   const handleSaveObs = async (novaObs) => {
     await onUpdateMesa(mesa.id, { observacoes: novaObs })
+    
   }
 
   return (

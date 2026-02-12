@@ -352,6 +352,7 @@ export default function MesasPage() {
           clientes={clientes}
           onUpdateQuantidade={handleUpdateQuantidade}
           onUpdateMesa={handleUpdateMesa}
+          loadMesas={loadMesas}
         />
       </div>
     )
