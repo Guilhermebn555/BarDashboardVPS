@@ -187,10 +187,7 @@ export default function EmprestimosPage() {
         
         {/* CABEÇALHO */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-gray-800 pb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-white">Gestão de Empréstimos</h1>
-            <p className="text-gray-400 text-sm mt-1">Acompanhe seus itens para não ter prejuízo</p>
-          </div>
+          <h1 className="text-2xl font-bold text-white">Empréstimos</h1>
           <div className="flex w-full md:w-auto gap-3">
              <button
               onClick={() => setIsModalProdutoOpen(true)}
@@ -340,7 +337,7 @@ export default function EmprestimosPage() {
                     value={nome}
                     onChange={(e) => setNome(e.target.value)}
                     className="w-full bg-[#111827] border border-gray-600 rounded-md p-2.5 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
-                    placeholder="Ex: Carlos da mesa 2"
+                    placeholder="Ex: Roldão Cliente"
                   />
                 </div>
 
@@ -399,7 +396,7 @@ export default function EmprestimosPage() {
                     type="text"
                     value={novoProdutoNome}
                     onChange={(e) => setNovoProdutoNome(e.target.value)}
-                    placeholder="Ex: Balde de Gelo"
+                    placeholder="Ex: Cadeira Crystal"
                     className="flex-1 bg-[#111827] border border-gray-600 rounded-md p-2 text-sm text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
                   />
                   <button type="submit" className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-md font-medium text-sm transition">
