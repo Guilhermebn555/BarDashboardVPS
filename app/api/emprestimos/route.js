@@ -32,17 +32,17 @@ export async function POST(request) {
         { status: 400 }
       )
     }
+    const validData = validationResult.data;
 
     const { data, error } = await supabase
       .from('emprestimos')
       .insert([{
-        nome: body.nome,
-        item_nome: body.item_nome,
-        quantidade: body.quantidade,
-        data_emprestimo: body.data_emprestimo,
-        hora: body.hora,
-        data_iso: body.data_iso,
-        devolvido: false
+        nome: validData.nome,
+        itens: validData.itens,
+        data_emprestimo: validData.data_emprestimo,
+        hora: validData.hora,
+        data_iso: validData.data_iso,
+        devolvido: validData.devolvido ?? false
       }])
       .select()
       .single()

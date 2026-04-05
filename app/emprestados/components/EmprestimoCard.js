@@ -79,9 +79,17 @@ export function EmprestimoCard({ emprestimo, onUpdate }) {
               )}
             </div>
             
-            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              <span className="font-bold text-blue-600 dark:text-blue-400">{emprestimo.quantidade}x </span> 
-              <span>{emprestimo.item_nome}</span>
+            <div className="space-y-1 mb-3">
+              {emprestimo.itens && emprestimo.itens.map((item, idx) => (
+                <div key={idx} className="text-sm flex items-center gap-2">
+                  <span className="text-blue-600 dark:text-blue-400 font-bold">
+                    {item.quantidade}x 
+                  </span>
+                  <span className={emprestimo.devolvido ? 'text-gray-500 line-through' : 'text-gray-700 dark:text-gray-300'}>
+                    {item.nome}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
           
