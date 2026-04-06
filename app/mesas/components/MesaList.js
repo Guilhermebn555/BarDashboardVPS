@@ -3,20 +3,9 @@
 import { ShoppingBag } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { MesaCard } from './MesaCard'
-import { useState } from 'react'
 
 export function MesaList({ 
-  mesas, 
-  produtos, 
-  clientes, 
-  onAddItem, 
-  onUpdateQuantidade, 
-  onRemoveItem, 
-  onFinalize, 
-  onAbate, 
-  onCloseMesa,
-  onRefresh,
-  loadMesas,
+  mesas,
   onMesaClick
 }) {
   const mesasOrdenadas = [...mesas].sort((a, b) => {
@@ -38,18 +27,7 @@ export function MesaList({
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {mesasOrdenadas.map((mesa) => (
         <MesaCard
-          key={mesa.id}
           mesa={mesa}
-          produtos={produtos}
-          clientes={clientes}
-          onAddItem={onAddItem}
-          onUpdateQuantidade={onUpdateQuantidade}
-          onRemoveItem={onRemoveItem}
-          onFinalize={onFinalize}
-          onAbate={onAbate}
-          onCloseMesa={onCloseMesa}
-          onRefresh={onRefresh}
-          loadMesas={loadMesas}
           onClick={onMesaClick}
         />
       ))}

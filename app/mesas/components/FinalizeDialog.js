@@ -16,10 +16,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 
-export function FinalizeDialog({ mesa, clientes, total, onFinalize }) {
+export function FinalizeDialog({ mesa, clientes, total, setMesaFocadaId, loadMesas }) {
   const [open, setOpen] = useState(false)
   const [tipoPagamento, setTipoPagamento] = useState('vista')
   const [clienteSelecionado, setClienteSelecionado] = useState('')
@@ -27,6 +26,11 @@ export function FinalizeDialog({ mesa, clientes, total, onFinalize }) {
   const [observacoesCompra, setObservacoesCompra] = useState('')
 
   const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
+  const totalFiado = mesa.itens.reduce((acc, item) => {
+    const valKgCad = item.isKg ? parseFloat(item.preco) : (item.preco * item.quantidade)
+    const val = parseFloat(item.valor_taxa) != 0 ? valKgCad + parseFloat(item.valor_taxa) : valKgCad
+    return acc + val
+  }, 0)
 
   useEffect(() => {
     if(!open) {
@@ -37,14 +41,74 @@ export function FinalizeDialog({ mesa, clientes, total, onFinalize }) {
     }
   }, [open])
 
-  const handleConfirm = () => {
-    onFinalize(mesa, {
-      tipoPagamento,
-      clienteSelecionado,
-      formaPagamento,
-      observacoesCompra,
-      total
-    })
+  const handleFinalize = async () => {
+    const dadosHistorico = {
+      nome_mesa: mesa.nome,
+      data_abertura: mesa.created_at,
+      itens: mesa.itens,
+      total: tipoPagamento == "fiado" ? totalFiado : total,
+      forma_pagamento: tipoPagamento === 'fiado' ? 'Fiado / Caderneta' : formaPagamento,
+      foi_fiado: tipoPagamento === 'fiado',
+      cliente_nome: tipoPagamento === 'fiado' 
+        ? clientes.find(c => c.id === clienteSelecionado)?.nome || 'Cliente Desconhecido'
+        : null,
+      logs: mesa.logs
+    }
+
+    if (tipoPagamento === 'fiado') {
+      mesa.itens.forEach(async i => {
+        if (i.ehAbatimento) {
+          const pos = Math.abs(i.preco)
+          const preco = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(pos)
+          i.nome = `${i.quantidade}x ${i.nome} - ${preco}`
+        }
+      })
+      try {
+        await fetch('/api/transacoes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cliente_id: clienteSelecionado,
+            tipo: 'compra',
+            valor: tipoPagamento == "fiado" ? totalFiado : total,
+            dados: { 
+              mesa: mesa.nome,
+              itens: mesa.itens,
+              logs: mesa.logs
+            },
+            observacoes: observacoesCompra || null
+          })
+        })
+
+        setMesaFocadaId(null)
+        await loadMesas()
+
+        alert('Consumo registrado na caderneta do cliente!')
+      } catch (error) {
+        console.error('Error registering purchase:', error)
+        alert('Erro ao registrar compra')
+        return
+      }
+    } else {
+      alert(`Mesa ${mesa.nome} finalizada! Pagamento: ${formaPagamento}`)
+    }
+
+    try {
+      await fetch('/api/mesas-anteriores', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dadosHistorico)
+      })
+    } catch (error) {
+      console.error('Erro ao salvar histórico:', error)
+    }
+
+    try {
+      await fetch(`/api/mesas/${mesa.id}`, { method: 'DELETE' })
+      await loadMesas()
+    } catch (error) {
+      console.error('Error finalizing mesa:', error)
+    }
     setOpen(false)
   }
 
@@ -85,7 +149,7 @@ export function FinalizeDialog({ mesa, clientes, total, onFinalize }) {
                 <span className={`text-5xl font-black tracking-tighter ${
                     tipoPagamento === 'vista' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-500'
                 }`}>
-                    {formatCurrency(total)}
+                    {formatCurrency(tipoPagamento == "fiado" ? totalFiado : total)}
                 </span>
                 {total === 0 && (
                     <Badge variant="outline" className="mt-2 text-slate-500 border-slate-300">
@@ -187,7 +251,7 @@ export function FinalizeDialog({ mesa, clientes, total, onFinalize }) {
 
         <div className="p-6 pt-2 bg-slate-50 dark:bg-slate-950 shrink-0">
             <Button
-                onClick={handleConfirm}
+                onClick={handleFinalize}
                 className={`w-full h-14 text-lg font-bold text-white shadow-lg transition-all active:scale-95 ${
                     tipoPagamento === 'vista' 
                     ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-900/20' 

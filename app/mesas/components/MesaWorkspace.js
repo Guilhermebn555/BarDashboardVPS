@@ -25,15 +25,15 @@ import { MesaObservacoes } from './MesaObservacoes'
 export function MesaWorkspace({ 
   mesa, 
   onBack, 
-  onAddItem, 
-  onFinalize, 
+  onAddItem,
   onAbate, 
   onRemoveItem,
   produtos,
   clientes,
   onUpdateQuantidade,
   onUpdateMesa,
-  loadMesas
+  loadMesas,
+  setMesaFocadaId
 }) {
   const formatCurrency = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v)
   const formatTime = (date) => new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(date))
@@ -250,7 +250,7 @@ export function MesaWorkspace({
                     <Separator className="my-4" />
                  </div>
                  <div className="w-full">
-                    <FinalizeDialog mesa={mesa} onFinalize={onFinalize} total={total} clientes={clientes}/>
+                    <FinalizeDialog mesa={mesa} total={total} clientes={clientes} setMesaFocadaId={setMesaFocadaId} loadMesas={loadMesas} />
                  </div>
             </div>
           </div>

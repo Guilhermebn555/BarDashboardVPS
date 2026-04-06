@@ -51,6 +51,7 @@ export default function ClientePage() {
       const res = await fetch('/api/produtos')
       const data = await res.json()
       setProdutos(data.produtos?.filter(p => p.ativo) || [])
+      console.log(produtos[0].valor_taxa);
     } catch (error) {
       console.error('Error loading products:', error)
     }

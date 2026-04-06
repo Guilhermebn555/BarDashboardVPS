@@ -39,7 +39,7 @@ export default function MesasPage() {
     try {
       const res = await fetch('/api/produtos')
       const data = await res.json()
-      setProdutos(data.produtos?.filter(p => p.ativo) || [])
+      await setProdutos(data.produtos?.filter(p => p.ativo) || [])
     } catch (error) {
       console.error('Error loading products:', error)
     }
@@ -91,7 +91,7 @@ export default function MesasPage() {
     quantidade, 
     produtoPersonalizado, 
     precoTotal
-  } = dados
+  } = dados;
 
   let novoItem
   let logMsg
@@ -125,7 +125,8 @@ export default function MesasPage() {
       nome: produtoSelecionado?.nome,
       preco: parseFloat(produtoSelecionado?.preco),
       quantidade: parseInt(quantidade),
-      ehAbatimento: false
+      ehAbatimento: false,
+      valor_taxa: produtoSelecionado.valor_taxa,
     }
     logMsg = `Adicionou ${quantidade}x ${produtoSelecionado?.nome}`
   }
@@ -258,76 +259,6 @@ export default function MesasPage() {
     }
   }
 
-  const handleFinalize = async (mesa, { tipoPagamento, clienteSelecionado, formaPagamento, observacoesCompra, total }) => {
-    const dadosHistorico = {
-      nome_mesa: mesa.nome,
-      data_abertura: mesa.created_at,
-      itens: mesa.itens,
-      total: total,
-      forma_pagamento: tipoPagamento === 'fiado' ? 'Fiado / Caderneta' : formaPagamento,
-      foi_fiado: tipoPagamento === 'fiado',
-      cliente_nome: tipoPagamento === 'fiado' 
-        ? clientes.find(c => c.id === clienteSelecionado)?.nome || 'Cliente Desconhecido'
-        : null,
-      logs: mesa.logs
-    }
-
-    if (tipoPagamento === 'fiado') {
-      mesa.itens.forEach(async i => {
-        if (i.ehAbatimento) {
-          const pos = Math.abs(i.preco)
-          const preco = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(pos)
-          i.nome = `${i.quantidade}x ${i.nome} - ${preco}`
-        }
-      })
-      try {
-        await fetch('/api/transacoes', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            cliente_id: clienteSelecionado,
-            tipo: 'compra',
-            valor: total,
-            dados: { 
-              mesa: mesa.nome,
-              itens: mesa.itens,
-              logs: mesa.logs
-            },
-            observacoes: observacoesCompra || null
-          })
-        })
-
-        setMesaFocadaId(null)
-        await loadMesas()
-
-        alert('Consumo registrado na caderneta do cliente!')
-      } catch (error) {
-        console.error('Error registering purchase:', error)
-        alert('Erro ao registrar compra')
-        return
-      }
-    } else {
-      alert(`Mesa ${mesa.nome} finalizada! Pagamento: ${formaPagamento}`)
-    }
-
-    try {
-      await fetch('/api/mesas-anteriores', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dadosHistorico)
-      })
-    } catch (error) {
-      console.error('Erro ao salvar histórico:', error)
-    }
-
-    try {
-      await fetch(`/api/mesas/${mesa.id}`, { method: 'DELETE' })
-      await loadMesas()
-    } catch (error) {
-      console.error('Error finalizing mesa:', error)
-    }
-  }
-
   const onMesaClick = (mesa) => {
     setMesaFocadaId(mesa.id)
     
@@ -347,12 +278,12 @@ export default function MesasPage() {
           produtos={produtos}
           onAbate={handleAbater}
           onAddItem={handleAdicionarItem}
-          onFinalize={handleFinalize}
           onRemoveItem={handleRemoverItem}
           clientes={clientes}
           onUpdateQuantidade={handleUpdateQuantidade}
           onUpdateMesa={handleUpdateMesa}
           loadMesas={loadMesas}
+          setMesaFocadaId={setMesaFocadaId}
         />
       </div>
     )
@@ -380,16 +311,7 @@ export default function MesasPage() {
 
         <MesaList 
           mesas={mesas} 
-          produtos={produtos} 
-          clientes={clientes} 
-          onAddItem={handleAdicionarItem}
-          onUpdateQuantidade={handleUpdateQuantidade}
-          onRemoveItem={handleRemoverItem}
-          onFinalize={handleFinalize}
-          onAbate={handleAbater}
-          loadMesas={loadMesas}
           onMesaClick={onMesaClick}
-          onVoltar={onVoltar}
         />
       </main>
     </div>
