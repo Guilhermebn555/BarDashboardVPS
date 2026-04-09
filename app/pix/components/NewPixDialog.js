@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { formatCurrency } from '@/lib/formatters'
 
 export function NewPixDialog({ produtos, onSuccess }) {
   const [open, setOpen] = useState(false)
@@ -19,8 +20,6 @@ export function NewPixDialog({ produtos, onSuccess }) {
   const [quantidade, setQuantidade] = useState('1')
   const [modoPersonalizado, setModoPersonalizado] = useState(false)
   const [produtoPersonalizado, setProdutoPersonalizado] = useState({ nome: '', preco: '' })
-
-  const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
 
   const handleAdicionarItem = () => {
     if (modoPersonalizado) {

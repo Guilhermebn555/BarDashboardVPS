@@ -13,11 +13,10 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
+import { formatTime } from '@/lib/formatters'
 
 export function LogsDialog({ mesa }) {
   
-  const formatTime = (date) => new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(date))
-
   const getLogStyle = (tipo) => {
     switch (tipo) {
       case 'add':

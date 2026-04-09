@@ -11,11 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { useConfirmExit } from '@/hooks/useConfirmExit'
-
-const normalizeText = (text) => {
-  if (!text) return ''
-  return text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[-]/g, ' ').replace(/[^\w\s]/g, '')
-}
+import { formatCurrency, normalizeText } from '@/lib/formatters'
 
 export function AddItemDialog({ mesa, produtos, onAddItem }) {
   const [open, setOpen] = useState(false)
@@ -32,8 +28,6 @@ export function AddItemDialog({ mesa, produtos, onAddItem }) {
   const produtosUnitarios = useMemo(() => produtos.filter(p => !p.isKg), [produtos])
   const produtosPorQuilo = useMemo(() => produtos.filter(p => p.isKg), [produtos])
 
-  const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
-
   useEffect(() => {
      if(!open) resetStates()
   }, [open])
@@ -45,7 +39,8 @@ export function AddItemDialog({ mesa, produtos, onAddItem }) {
       itemFinal = { 
         modo: 'cadastrado',
         produtoSelecionado: produtoSelecionado, 
-        quantidade: quantidade 
+        quantidade: quantidade,
+        // taxa,
       }
     } else if (abaAtiva === 'quilo') {
       itemFinal = { 

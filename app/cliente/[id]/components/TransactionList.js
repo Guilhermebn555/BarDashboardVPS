@@ -5,11 +5,9 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ScrollText } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { formatCurrency, formatTime } from '@/lib/formatters'
 
 export function TransactionList({ transacoes }) {
-  const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val)
-  const formatDate = (date) => new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(date))
-
   if (transacoes.length === 0) {
     return (
       <Card>
@@ -31,7 +29,7 @@ export function TransactionList({ transacoes }) {
                   <Badge variant={transacao.tipo === 'compra' ? 'destructive' : 'default'} className={transacao.tipo !== 'compra' ? 'bg-green-600' : ''}>
                     {transacao.tipo === 'compra' ? 'Compra' : 'Pagamento'}
                   </Badge>
-                  <span className="text-xs sm:text-sm text-gray-500">{formatDate(transacao.created_at)}</span>
+                  <span className="text-xs sm:text-sm text-gray-500">{formatTime(transacao.created_at)}</span>
                 </div>
 
                 {transacao.dados?.itens && transacao.dados.itens.length > 0 && (

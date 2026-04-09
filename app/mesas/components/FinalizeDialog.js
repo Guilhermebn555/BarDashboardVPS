@@ -17,15 +17,16 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
+import { formatCurrency } from '@/lib/formatters'
+import { PAYMENT_METHODS, PAYMENT_LABELS } from '@/lib/constants'
 
 export function FinalizeDialog({ mesa, clientes, total, setMesaFocadaId, loadMesas }) {
   const [open, setOpen] = useState(false)
   const [tipoPagamento, setTipoPagamento] = useState('vista')
   const [clienteSelecionado, setClienteSelecionado] = useState('')
-  const [formaPagamento, setFormaPagamento] = useState('dinheiro')
+  const [formaPagamento, setFormaPagamento] = useState(PAYMENT_METHODS.CASH)
   const [observacoesCompra, setObservacoesCompra] = useState('')
 
-  const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
   const totalFiado = mesa.itens.reduce((acc, item) => {
     const valKgCad = item.isKg ? parseFloat(item.preco) : (item.preco * item.quantidade)
     const val = parseFloat(item.valor_taxa) != 0 ? valKgCad + parseFloat(item.valor_taxa) : valKgCad
@@ -36,7 +37,7 @@ export function FinalizeDialog({ mesa, clientes, total, setMesaFocadaId, loadMes
     if(!open) {
         setTipoPagamento('vista')
         setClienteSelecionado('')
-        setFormaPagamento('dinheiro')
+        setFormaPagamento(PAYMENT_METHODS.CASH)
         setObservacoesCompra('')
     }
   }, [open])
@@ -56,10 +57,10 @@ export function FinalizeDialog({ mesa, clientes, total, setMesaFocadaId, loadMes
     }
 
     if (tipoPagamento === 'fiado') {
-      mesa.itens.forEach(async i => {
+      mesa.itens.forEach(i => {
         if (i.ehAbatimento) {
           const pos = Math.abs(i.preco)
-          const preco = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(pos)
+          const preco = formatCurrency(pos)
           i.nome = `${i.quantidade}x ${i.nome} - ${preco}`
         }
       })
@@ -184,22 +185,22 @@ export function FinalizeDialog({ mesa, clientes, total, setMesaFocadaId, loadMes
                         <Label className="text-xs font-bold text-slate-500 uppercase">Como o cliente pagou?</Label>
                         <div className="grid grid-cols-3 gap-3">
                             <PaymentMethodButton 
-                                active={formaPagamento === 'dinheiro'}
-                                onClick={() => setFormaPagamento('dinheiro')}
+                                active={formaPagamento === PAYMENT_METHODS.CASH}
+                                onClick={() => setFormaPagamento(PAYMENT_METHODS.CASH)}
                                 icon={Banknote}
-                                label="Dinheiro"
+                                label={PAYMENT_LABELS[PAYMENT_METHODS.CASH]}
                             />
                             <PaymentMethodButton 
-                                active={formaPagamento === 'pix'}
-                                onClick={() => setFormaPagamento('pix')}
+                                active={formaPagamento === PAYMENT_METHODS.PIX}
+                                onClick={() => setFormaPagamento(PAYMENT_METHODS.PIX)}
                                 icon={QrCode}
-                                label="PIX"
+                                label={PAYMENT_LABELS[PAYMENT_METHODS.PIX]}
                             />
                             <PaymentMethodButton 
-                                active={formaPagamento === 'cartao'}
-                                onClick={() => setFormaPagamento('cartao')}
+                                active={formaPagamento === PAYMENT_METHODS.CARD}
+                                onClick={() => setFormaPagamento(PAYMENT_METHODS.CARD)}
                                 icon={CreditCard}
-                                label="Cartão"
+                                label={PAYMENT_LABELS[PAYMENT_METHODS.CARD]}
                             />
                         </div>
                     </div>

@@ -9,14 +9,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader'
 import { MesaItens } from './components/MesaItens'
+import { formatCurrency } from '@/lib/formatters'
 
 export default function MesasAnterioresPage() {
   const router = useRouter()
   const [historico, setHistorico] = useState([])
   const [loading, setLoading] = useState(true)
 
-  const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val)
-  
   useEffect(() => {
     fetchHistorico()
   }, [])

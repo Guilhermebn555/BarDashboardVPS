@@ -102,7 +102,8 @@ export default function MesasPage() {
       nome: produtoPersonalizado.nome,
       preco: parseFloat(produtoPersonalizado.preco),
       quantidade: parseInt(quantidade),
-      ehAbatimento: false
+      ehAbatimento: false,
+      valor_taxa: 0,
     }
     logMsg = `Adicionou ${quantidade}x ${produtoPersonalizado.nome} (Manual)`
   } 
@@ -114,7 +115,8 @@ export default function MesasPage() {
       preco: parseFloat(precoTotal), 
       quantidade: parseFloat(quantidade),
       ehAbatimento: false,
-      isKg: true
+      isKg: true,
+      valor_taxa: 0,
     }
     logMsg = `Adicionou ${quantidade}kg de ${produtoSelecionado?.nome}`
   } 

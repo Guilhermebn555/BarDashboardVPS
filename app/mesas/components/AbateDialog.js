@@ -7,13 +7,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
+import { formatCurrency } from '@/lib/formatters'
 
 export function AbateDialog({ mesa, total, onAbate }) {
   const [open, setOpen] = useState(false)
   const [valorAbater, setValorAbater] = useState('')
   const [metodoPagamento, setMetodoPagamento] = useState('dinheiro')
-
-  const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
 
   useEffect(() => {
     if (!open) {

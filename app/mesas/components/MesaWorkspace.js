@@ -21,6 +21,7 @@ import { LogsDialog } from './LogsDialog'
 import { DeleteMesaDialog } from './DeleteDialog'
 import { EditMesaDialog } from './EditMesaDialog'
 import { MesaObservacoes } from './MesaObservacoes'
+import { formatCurrency, formatTime } from '@/lib/formatters'
 
 export function MesaWorkspace({ 
   mesa, 
@@ -35,9 +36,6 @@ export function MesaWorkspace({
   loadMesas,
   setMesaFocadaId
 }) {
-  const formatCurrency = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v)
-  const formatTime = (date) => new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(date))
-  
   const total = mesa.itens.reduce((acc, item) => {
     const val = item.isKg ? parseFloat(item.preco) : (item.preco * item.quantidade)
     return acc + val

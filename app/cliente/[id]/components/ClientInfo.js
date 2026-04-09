@@ -7,13 +7,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { EditClientDialog } from './EditClientDialog'
 import { PdfDialog } from './PdfDialog'
 import { useRouter } from 'next/navigation'
+import { formatCurrency } from '@/lib/formatters'
 
 export function ClientInfo({ cliente, onUpdate }) {
   const router = useRouter()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showStatusModal, setShowStatusModal] = useState(false)
   
-  const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val)
   const getBalanceColor = (saldo) => saldo > 0 ? 'text-green-600 dark:text-green-400' : saldo < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-600'
 
   const limiteEstourado = cliente.limite_credito > 0 && cliente.saldo < -cliente.limite_credito
