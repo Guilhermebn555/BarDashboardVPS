@@ -28,9 +28,26 @@ export function FinalizeDialog({ mesa, clientes, total, setMesaFocadaId, loadMes
   const [observacoesCompra, setObservacoesCompra] = useState('')
 
   const totalFiado = mesa.itens.reduce((acc, item) => {
-    const valKgCad = item.isKg ? parseFloat(item.preco) : (item.preco * item.quantidade)
-    const val = parseFloat(item.valor_taxa) != 0 ? valKgCad + parseFloat(item.valor_taxa) : valKgCad
-    return acc + val
+    // 1. Extrai preço e quantidade com segurança (se falhar, assume qtd 1 para não zerar)
+    const preco = Number(item.preco) || 0;
+    const qtd = Number(item.quantidade) || 1; 
+
+    // Se for um item de abatimento (desconto/pagamento parcial), o preço já vem negativo
+    if (item.ehAbatimento) {
+        return acc + preco; 
+    }
+
+    // 2. Calcula o valor base do item (Quilo vs Unidade)
+    const valKgCad = item.isKg ? preco : (preco * qtd);
+
+    // 3. Extrai a taxa com segurança. Se for null/undefined/vazio, vira 0.
+    let taxa = 0;
+    if (item.valor_taxa) {
+        taxa = Number(item.valor_taxa) || 0;
+    }
+
+    // 4. Soma o valor base + a taxa (mantendo sua lógica original)
+    return acc + valKgCad + taxa;
   }, 0)
 
   useEffect(() => {
