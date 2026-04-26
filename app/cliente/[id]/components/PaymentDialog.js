@@ -7,12 +7,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 
 export function PaymentDialog({ clienteId, onSuccess }) {
   const [open, setOpen] = useState(false)
   const [valorAbate, setValorAbate] = useState('')
   const [formaPagamento, setFormaPagamento] = useState('dinheiro')
-
+  const [observacoes, setObservacoes] = useState('')
   const [loading, setLoading] = useState(false)
 
   const handleAbater = async () => {
@@ -26,7 +27,8 @@ export function PaymentDialog({ clienteId, onSuccess }) {
           cliente_id: clienteId,
           tipo: 'abate',
           valor: parseFloat(valorAbate),
-          dados: { forma_pagamento: formaPagamento }
+          dados: { forma_pagamento: formaPagamento },
+          observacoes: observacoes || null
         })
       })
       if (res.ok) {
@@ -67,6 +69,10 @@ export function PaymentDialog({ clienteId, onSuccess }) {
                 <SelectItem value="cartao">Cartão</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div>
+            <Label>Observações (Opcional)</Label>
+            <Textarea value={observacoes} onChange={(e) => setObservacoes(e.target.value)} rows={3} />
           </div>
           <Button onClick={handleAbater} className="w-full" disabled={!valorAbate || loading}>Registrar</Button>
         </div>
