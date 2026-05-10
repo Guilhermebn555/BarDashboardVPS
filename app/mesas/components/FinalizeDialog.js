@@ -9,7 +9,8 @@ import {
   Banknote, 
   QrCode, 
   NotebookPen,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
@@ -27,26 +28,23 @@ export function FinalizeDialog({ mesa, clientes, total, setMesaFocadaId, loadMes
   const [formaPagamento, setFormaPagamento] = useState(PAYMENT_METHODS.CASH)
   const [observacoesCompra, setObservacoesCompra] = useState('')
 
+  const [loading, setLoading] = useState(false)
+
   const totalFiado = mesa.itens.reduce((acc, item) => {
-    // 1. Extrai preço e quantidade com segurança (se falhar, assume qtd 1 para não zerar)
     const preco = Number(item.preco) || 0;
     const qtd = Number(item.quantidade) || 1; 
 
-    // Se for um item de abatimento (desconto/pagamento parcial), o preço já vem negativo
     if (item.ehAbatimento) {
         return acc + preco; 
     }
 
-    // 2. Calcula o valor base do item (Quilo vs Unidade)
     const valKgCad = item.isKg ? preco : (preco * qtd);
 
-    // 3. Extrai a taxa com segurança. Se for null/undefined/vazio, vira 0.
     let taxa = 0;
     if (item.valor_taxa) {
         taxa = Number(item.valor_taxa) || 0;
     }
 
-    // 4. Soma o valor base + a taxa (mantendo sua lógica original)
     return acc + valKgCad + taxa;
   }, 0)
 
@@ -60,6 +58,7 @@ export function FinalizeDialog({ mesa, clientes, total, setMesaFocadaId, loadMes
   }, [open])
 
   const handleFinalize = async () => {
+    setLoading(true)
     const dadosHistorico = {
       nome_mesa: mesa.nome,
       data_abertura: mesa.created_at,
@@ -127,6 +126,7 @@ export function FinalizeDialog({ mesa, clientes, total, setMesaFocadaId, loadMes
     } catch (error) {
       console.error('Error finalizing mesa:', error)
     }
+    setLoading(false)
     setOpen(false)
   }
 
@@ -275,12 +275,12 @@ export function FinalizeDialog({ mesa, clientes, total, setMesaFocadaId, loadMes
                     ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-900/20' 
                     : 'bg-amber-600 hover:bg-amber-700 shadow-amber-900/20'
                 }`}
-                disabled={(tipoPagamento === 'fiado' && !clienteSelecionado) || (total === 0 && mesa.itens.length === 0)}
+                disabled={(tipoPagamento === 'fiado' && !clienteSelecionado) || (total === 0 && mesa.itens.length === 0) || loading}
             >
                 {tipoPagamento === 'vista' ? (
-                    <> <CheckCircle2 className="mr-2 w-6 h-6" /> Confirmar Recebimento </>
+                    <> {loading ? <Loader2 className="mr-2 w-6 h-6 animate-spin" /> : <CheckCircle2 className="mr-2 w-6 h-6" />} Confirmar Recebimento </>
                 ) : (
-                    <> <NotebookPen className="mr-2 w-6 h-6" /> Registrar na Caderneta </>
+                    <> {loading ? <Loader2 className="mr-2 w-6 h-6 animate-spin" /> : <NotebookPen className="mr-2 w-6 h-6" />} Registrar na Caderneta </>
                 )}
             </Button>
         </div>

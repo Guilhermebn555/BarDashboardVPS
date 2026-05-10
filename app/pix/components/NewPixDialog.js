@@ -10,6 +10,16 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { formatCurrency } from '@/lib/formatters'
 
+const normalizeText = (text) => {
+  if (!text) return ''
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[-]/g, ' ')
+    .replace(/[^\w\s]/g, '')
+}
+
 export function NewPixDialog({ produtos, onSuccess }) {
   const [open, setOpen] = useState(false)
   const [nomeCliente, setNomeCliente] = useState('')
@@ -132,40 +142,39 @@ export function NewPixDialog({ produtos, onSuccess }) {
           {!modoPersonalizado ? (
             <div>
               <Label>Produto</Label>
-              <Popover open={produtoOpen} onOpenChange={setProdutoOpen}>
+              <Popover open={produtoOpen} onOpenChange={setProdutoOpen} modal={true}>
                 <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    className="w-full justify-between"
-                  >
+                  <Button variant="outline" role="combobox" className="w-full justify-between">
                     {produtoSelecionado ? produtoSelecionado.nome : 'Selecione um produto...'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-full p-0">
-                  <Command>
+                  <Command 
+                    filter={(value, search) => {
+                      const normalizedValue = normalizeText(value)
+                      const normalizedSearch = normalizeText(search)
+                      return normalizedValue.includes(normalizedSearch) ? 1 : 0
+                    }}
+                  >
                     <CommandInput placeholder="Buscar produto..." />
-                    <CommandList className="max-h-64">
+                    <CommandList className="max-h-64 overflow-y-auto overflow-x-hidden">
                       <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
                       <CommandGroup>
                         {produtos.map((produto) => (
                           <CommandItem
                             key={produto.id}
+                            value={produto.nome}
                             onSelect={() => {
                               setProdutoSelecionado(produto)
                               setProdutoOpen(false)
                             }}
                           >
-                            <Check
-                              className={`mr-2 h-4 w-4 ${
-                                produtoSelecionado?.id === produto.id ? 'opacity-100' : 'opacity-0'
-                              }`}
-                            />
+                            <Check className={`mr-2 h-4 w-4 ${produtoSelecionado?.id === produto.id ? 'opacity-100' : 'opacity-0'}`} />
                             <div className="flex-1">
-                              <p className="font-medium">{produto.nome}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {formatCurrency(produto.preco)}
-                              </p>
+                              <span>{produto.nome}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-muted-foreground">{formatCurrency(produto.preco)}</span>
+                              </div>
                             </div>
                           </CommandItem>
                         ))}

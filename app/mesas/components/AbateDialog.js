@@ -14,6 +14,8 @@ export function AbateDialog({ mesa, total, onAbate }) {
   const [valorAbater, setValorAbater] = useState('')
   const [metodoPagamento, setMetodoPagamento] = useState('dinheiro')
 
+  const [loading, setLoading] = useState(false)
+
   useEffect(() => {
     if (!open) {
       setValorAbater('')
@@ -22,11 +24,13 @@ export function AbateDialog({ mesa, total, onAbate }) {
   }, [open])
 
   const handleConfirm = () => {
+    setLoading(true)
     onAbate(mesa, {
       valorAbater,
       metodoPagamentoAbater: metodoPagamento,
       total
     })
+    setLoading(false)
     setOpen(false)
   }
 
@@ -128,9 +132,14 @@ export function AbateDialog({ mesa, total, onAbate }) {
           <Button
             onClick={handleConfirm}
             className="w-full h-14 text-lg font-bold bg-orange-600 hover:bg-orange-700 text-white shadow-lg shadow-orange-900/20 active:scale-95 transition-all"
-            disabled={!isValorValido}
+            disabled={!isValorValido || loading}
           >
-            Confirmar Abatimento <ArrowDown className="ml-2 w-5 h-5" />
+            {loading ? (
+              <Loader2 className="ml-2 w-5 h-5 animate-spin" />
+            ) : (
+              <ArrowDown className="ml-2 w-5 h-5" />
+            )}
+            Confirmar Abatimento
           </Button>
 
         </div>

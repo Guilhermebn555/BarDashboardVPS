@@ -28,11 +28,14 @@ export function AddItemDialog({ mesa, produtos, onAddItem }) {
   const produtosUnitarios = useMemo(() => produtos.filter(p => !p.isKg), [produtos])
   const produtosPorQuilo = useMemo(() => produtos.filter(p => p.isKg), [produtos])
 
+  const [loading, setLoading] = useState(false)
+
   useEffect(() => {
      if(!open) resetStates()
   }, [open])
 
   const handleConfirm = () => {
+    setLoading(true)
     let itemFinal = {}
 
     if (abaAtiva === 'cadastrado') {
@@ -58,6 +61,7 @@ export function AddItemDialog({ mesa, produtos, onAddItem }) {
     }
 
     onAddItem(mesa, itemFinal)
+    setLoading(false)
     setOpen(false)
   }
 
@@ -226,9 +230,14 @@ export function AddItemDialog({ mesa, produtos, onAddItem }) {
                 size="lg"
                 onClick={handleConfirm}
                 className="h-12 px-8 font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition-all active:scale-95"
-                disabled={currentTotal <= 0}
+                disabled={currentTotal <= 0 || loading}
              >
-                Confirmar <Check className="ml-2 w-5 h-5" />
+                {loading ? (
+                    <Loader2 className="ml-2 w-5 h-5 animate-spin" />
+                ) : (
+                    <Check className="ml-2 w-5 h-5" />
+                )}
+                Confirmar
              </Button>
           </div>
 
