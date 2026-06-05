@@ -42,7 +42,7 @@ export function FinalizeDialog({ mesa, clientes, total, setMesaFocadaId, loadMes
 
     let taxa = 0;
     if (item.valor_taxa) {
-        taxa = Number(item.valor_taxa) || 0;
+        taxa = Number(item.valor_taxa * qtd) || 0;
     }
 
     return acc + valKgCad + taxa;

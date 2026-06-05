@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_VIDEOKE_SUPABASE_URL,
-  process.env.VIDEOKE_SUPABASE_SERVICE_ROLE_KEY 
-);
+const SUPABASE_URL = process.env.NEXT_PUBLIC_VIDEOKE_SUPABASE_URL;
+const SUPABASE_SECRET_KEY = process.env.VIDEOKE_SUPABASE_SECRET_KEY;
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
 
 export async function GET() {
   try {
